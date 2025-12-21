@@ -2,27 +2,27 @@
 #include "bubble.h"
 #include "game.h"
 
-#include <stdlib.h>
+#include <malloc.h>
 
 static bool IsBubbleMatchColor(Bubble* bubble, Color color)
 {
 	return bubble->color.r == color.r && bubble->color.g == color.g && bubble->color.b == color.b;
 }
 
-static void FindMatches(Board* board, Game* game)
+static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 {
-	const Bubble* bubble = board->cells[board->last_update_w][board->last_update_h];
+	const Bubble* bubble = board->cells[w_added][h_added];
 	if (!bubble)
 		return;
 
 	const Color clr_to_match = bubble->color;
 
 	int w_matches = 0;
-	int w_from = board->last_update_w, w_to = board->last_update_w, w = board->last_update_w;
+	int w_from = w_added, w_to = w_added, w = w_added;
 
 	while (w < BOARD_SIZE_WIDTH)
 	{
-		Bubble* bubble = board->cells[w][board->last_update_h];
+		Bubble* bubble = board->cells[w][h_added];
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			w_to = w;
@@ -32,10 +32,10 @@ static void FindMatches(Board* board, Game* game)
 			break;
 		++w;
 	}
-	w = board->last_update_w - 1;
+	w = w_added - 1;
 	while (w >= 0)
 	{
-		Bubble* bubble = board->cells[w][board->last_update_h];
+		Bubble* bubble = board->cells[w][h_added];
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			w_from = w;
@@ -47,11 +47,11 @@ static void FindMatches(Board* board, Game* game)
 	}
 
 	int h_matches = 0;
-	int h_from = board->last_update_h, h_to = board->last_update_h, h = board->last_update_h;
+	int h_from = h_added, h_to = h_added, h = h_added;
 
 	while (h < BOARD_SIZE_HEIGHT)
 	{
-		Bubble* bubble = board->cells[board->last_update_w][h];
+		Bubble* bubble = board->cells[w_added][h];
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			h_to = h;
@@ -61,10 +61,10 @@ static void FindMatches(Board* board, Game* game)
 			break;
 		++h;
 	}
-	h = board->last_update_h - 1;
+	h = h_added - 1;
 	while (h >= 0)
 	{
-		Bubble* bubble = board->cells[board->last_update_w][h];
+		Bubble* bubble = board->cells[w_added][h];
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			h_from = h;
@@ -79,11 +79,12 @@ static void FindMatches(Board* board, Game* game)
 	{
 		for (int w = w_from; w <= w_to; ++w)
 		{
-			Bubble* bubble = board->cells[w][board->last_update_h];
+			Bubble* bubble = board->cells[w][h_added];
 			if (bubble)
 			{
 				BubbleDestroy(bubble);
-				board->cells[w][board->last_update_h] = NULL;
+				board->cells[w][h_added] = NULL;
+				board->free_cells_count++;
 			}
 		}
 	}
@@ -91,11 +92,12 @@ static void FindMatches(Board* board, Game* game)
 	{
 		for (int h = h_from; h <= h_to; ++h)
 		{
-			Bubble* bubble = board->cells[board->last_update_w][h];
+			Bubble* bubble = board->cells[w_added][h];
 			if (bubble)
 			{
 				BubbleDestroy(bubble);
-				board->cells[board->last_update_w][h] = NULL;
+				board->cells[w_added][h] = NULL;
+				board->free_cells_count++;
 			}
 		}
 	}
@@ -103,10 +105,15 @@ static void FindMatches(Board* board, Game* game)
 
 static bool Update(Board* board, Game* game)
 {
-	FindMatches(board, game);
+	while (board->added_bubbles)
+	{
+		board->added_bubbles--;
+		int h_added = board->last_update_h[board->added_bubbles];
+		int w_added = board->last_update_w[board->added_bubbles];
+		FindMatches(board, game, h_added, w_added);
+	}
 
-	bool is_bubbles_updated = false;
-	bool is_board_emptry = true;
+	bool is_bubbles_updated = true;
 
 	for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
 	{
@@ -115,13 +122,12 @@ static bool Update(Board* board, Game* game)
 			Bubble* bubble = board->cells[w][h];
 			if (bubble)
 			{
-				is_board_emptry = false;
 				bool is_updated = bubble->fnUpdate(bubble);
-				is_bubbles_updated = is_bubbles_updated || is_updated;
+				is_bubbles_updated = is_bubbles_updated && is_updated;
 			}
 		}
 	}
-	return is_bubbles_updated || is_board_emptry;
+	return is_bubbles_updated;
 }
 
 static Bubble* TryGetBubble(Board* board, Vector2 hitPos)
@@ -151,8 +157,9 @@ static void MoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 			board->cells[w_to][h_to] = board->cells[w_from][h_from];
 			board->cells[w_from][h_from] = NULL;
 
-			board->last_update_h = h_to;
-			board->last_update_w = w_to;
+			board->last_update_h[0] = h_to;
+			board->last_update_w[0] = w_to;
+			board->added_bubbles = 1;
 		}
 	}
 }
@@ -176,25 +183,12 @@ static void DrawBoard(Board* board, int board_pos_x, int board_pos_y)
 
 static bool AddBubble(Board* board)
 {
-	int free_cells_count = 0;
-
-	for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
-	{
-		for (int h = 0; h < BOARD_SIZE_HEIGHT; ++h)
-		{
-			if (NULL == board->cells[w][h])
-			{
-				++free_cells_count;
-			}
-		}
-	}
-
-	if (0 == free_cells_count)
+	if (0 == board->free_cells_count)
 	{
 		return false;
 	}
 
-	int occupy_cell_index = GetRandomValue(0, free_cells_count - 1);
+	int occupy_cell_index = GetRandomValue(0, board->free_cells_count - 1);
 
 	for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
 	{
@@ -207,8 +201,10 @@ static bool AddBubble(Board* board)
 					Color clr = board->colors[GetRandomValue(0, BOARD_CELL_TYPES - 1)];
 					board->cells[w][h] = BubbleCreate(clr);
 
-					board->last_update_h = h;
-					board->last_update_w = w;
+					board->last_update_h[board->added_bubbles] = h;
+					board->last_update_w[board->added_bubbles] = w;
+					board->free_cells_count--;
+					board->added_bubbles++;
 				}
 				--occupy_cell_index;
 			}
@@ -240,8 +236,8 @@ Board* BoardCreate()
 		board->colors[6] = BEIGE;
 		board->colors[7] = MAGENTA;
 
-		board->last_update_h = 0;
-		board->last_update_w = 0;
+		board->added_bubbles = 0;
+		board->free_cells_count = BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT;
 
 		board->fnDraw = DrawBoard;
 		board->fnAddBubble = AddBubble;

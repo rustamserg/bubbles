@@ -2,18 +2,17 @@
 #include "board.h"
 #include "game.h"
 
-#include "raylib.h"
-
-#include <stdlib.h>
+#include <malloc.h>
 
 
 static bool Update(Dummy* dummy, Game* game)
 {
-	const bool is_board_filled = !game->board->fnAddBubble(game->board);
-	if (is_board_filled)
+	int to_add = NUM_BUBBLES_TO_ADD;
+	bool is_board_filled = false;
+
+	while (to_add-- && !is_board_filled)
 	{
-		BoardDestroy(game->board);
-		game->board = BoardCreate();
+		is_board_filled = !game->board->fnAddBubble(game->board);
 	}
 	return true;
 }

@@ -7,6 +7,7 @@
 #define BOARD_SIZE_HEIGHT 8
 #define BOARD_CELL_SIZE 80
 #define BOARD_CELL_TYPES 8
+#define NUM_BUBBLES_TO_ADD 3
 
 struct Bubble;
 struct Game;
@@ -16,8 +17,10 @@ typedef struct Board
 	Color colors[BOARD_CELL_TYPES];
 	struct Bubble* cells[BOARD_SIZE_WIDTH][BOARD_SIZE_HEIGHT];
 
-	int last_update_h;
-	int last_update_w;
+	int added_bubbles;
+	int last_update_h[NUM_BUBBLES_TO_ADD];
+	int last_update_w[NUM_BUBBLES_TO_ADD];
+	int free_cells_count;
 
 	void (*fnDraw)(struct Board*, int, int);
 	bool (*fnUpdate)(struct Board*, struct Game*);

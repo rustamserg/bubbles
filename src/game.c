@@ -1,6 +1,5 @@
 #include "game.h"
 #include "board.h"
-#include "bubble.h"
 #include "dummy.h"
 
 #include "raylib.h"
@@ -18,7 +17,16 @@ static void Update(Game* game)
 			end_turn = game->ai->fnUpdate(game->ai, game);
 			if (end_turn)
 			{
-				game->turn = TURN_PLAYER;
+				if (0 == game->board->free_cells_count)
+				{
+					// TODO: game end here
+					BoardDestroy(game->board);
+					game->board = BoardCreate();
+				}
+				else
+				{
+					game->turn = TURN_PLAYER;
+				}
 			}
 		}
 		else if (TURN_PLAYER == game->turn)

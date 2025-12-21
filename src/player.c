@@ -5,7 +5,7 @@
 
 #include "raylib.h"
 
-#include <stdlib.h>
+#include <malloc.h>
 
 
 typedef struct Player
