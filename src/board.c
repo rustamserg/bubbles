@@ -17,7 +17,8 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 
 	const Color clr_to_match = bubble->color;
 
-	int w_matches = 0;
+	// scan row
+	int matches = 0;
 	int w_from = w_added, w_to = w_added, w = w_added;
 
 	while (w < BOARD_SIZE_WIDTH)
@@ -26,7 +27,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			w_to = w;
-			++w_matches;
+			++matches;
 		}
 		else
 			break;
@@ -39,14 +40,24 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			w_from = w;
-			++w_matches;
+			++matches;
 		}
 		else
 			break;
 		--w;
 	}
 
-	int h_matches = 0;
+	if (matches >= game->min_matches)
+	{
+		for (w = w_from; w <= w_to; ++w)
+		{
+			Bubble* bubble = board->cells[w][h_added];
+			BubbleMarkForDestroy(bubble);
+		}
+	}
+
+	// scan height
+	matches = 0;
 	int h_from = h_added, h_to = h_added, h = h_added;
 
 	while (h < BOARD_SIZE_HEIGHT)
@@ -55,7 +66,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			h_to = h;
-			++h_matches;
+			++matches;
 		}
 		else
 			break;
@@ -68,33 +79,121 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
 		{
 			h_from = h;
-			++h_matches;
+			++matches;
 		}
 		else
 			break;
 		--h;
 	}
 
-	if (w_matches >= game->min_matches)
+	if (matches >= game->min_matches)
 	{
-		for (int w = w_from; w <= w_to; ++w)
-		{
-			Bubble* bubble = board->cells[w][h_added];
-			if (bubble)
-			{
-				BubbleMarkForDestroy(bubble);
-			}
-		}
-	}
-	if (h_matches >= game->min_matches)
-	{
-		for (int h = h_from; h <= h_to; ++h)
+		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w_added][h];
-			if (bubble)
-			{
-				BubbleMarkForDestroy(bubble);
-			}
+			BubbleMarkForDestroy(bubble);
+		}
+	}
+
+	// scan up-left to down-rigth
+	matches = 0;
+	w_from = w_added, w_to = w_added, w = w_added;
+	h_from = h_added, h_to = h_added, h = h_added;
+
+	// going up-left
+	while (w >= 0 && h >= 0)
+	{
+		Bubble* bubble = board->cells[w][h];
+		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
+		{
+			h_from = h;
+			w_from = w;
+			++matches;
+		}
+		else
+			break;
+		--w;
+		--h;
+	}
+
+	// going down-right
+	w = w_added + 1;
+	h = h_added + 1;
+
+	while (w < BOARD_SIZE_WIDTH && h < BOARD_SIZE_HEIGHT)
+	{
+		Bubble* bubble = board->cells[w][h];
+		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
+		{
+			h_to = h;
+			w_to = w;
+			++matches;
+		}
+		else
+			break;
+		++w;
+		++h;
+	}
+
+	if (matches >= game->min_matches)
+	{
+		w = w_from;
+		for (h = h_from; h <= h_to; ++h)
+		{
+			Bubble* bubble = board->cells[w][h];
+			BubbleMarkForDestroy(bubble);
+			++w;
+		}
+	}
+
+	// scan up-right to down-left
+	matches = 0;
+	w_from = w_added, w_to = w_added, w = w_added;
+	h_from = h_added, h_to = h_added, h = h_added;
+
+	// going up-right
+	while (w < BOARD_SIZE_WIDTH && h >= 0)
+	{
+		Bubble* bubble = board->cells[w][h];
+		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
+		{
+			h_from = h;
+			w_from = w;
+			++matches;
+		}
+		else
+			break;
+		++w;
+		--h;
+	}
+
+	// going down-left
+	w = w_added - 1;
+	h = h_added + 1;
+
+	while (w >= 0 && h < BOARD_SIZE_HEIGHT)
+	{
+		Bubble* bubble = board->cells[w][h];
+		if (bubble && IsBubbleMatchColor(bubble, clr_to_match))
+		{
+			h_to = h;
+			w_to = w;
+			++matches;
+		}
+		else
+			break;
+		--w;
+		++h;
+	}
+
+	if (matches >= game->min_matches)
+	{
+		w = w_from;
+		for (h = h_from; h <= h_to; ++h)
+		{
+			Bubble* bubble = board->cells[w][h];
+			BubbleMarkForDestroy(bubble);
+			--w;
 		}
 	}
 }
