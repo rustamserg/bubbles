@@ -4,6 +4,15 @@
 #define DRAW_OFFSET_X 50
 #define DRAW_OFFSET_Y 50
 
+#define BOARD_SIZE_WIDTH 8
+#define BOARD_SIZE_HEIGHT 8
+#define BOARD_CELL_SIZE 80
+#define BOARD_CELL_TYPES 8
+
+#define MIN_MATCHES_IN_ROW 5
+#define NUM_BUBBLES_TO_ADD 3
+#define ADD_ANIMATION_TIME 0.3f
+
 struct Board;
 struct Dummy;
 

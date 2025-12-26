@@ -4,8 +4,6 @@
 
 #include "raylib.h"
 
-#define MIN_MATCHES_IN_ROW 5
-
 
 static void Update(Game* game)
 {

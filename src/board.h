@@ -1,13 +1,8 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+#include "game.h"
 #include "raylib.h"
-
-#define BOARD_SIZE_WIDTH 8
-#define BOARD_SIZE_HEIGHT 8
-#define BOARD_CELL_SIZE 80
-#define BOARD_CELL_TYPES 8
-#define NUM_BUBBLES_TO_ADD 3
 
 struct Bubble;
 struct Game;

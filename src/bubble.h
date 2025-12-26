@@ -3,20 +3,22 @@
 
 #include "raylib.h"
 
-
 typedef struct Bubble
 {
 	Color color;
 	bool is_selected;
+	bool mark_for_destroy;
 
 	float radius;
 	float add_time_animation;
+	float destroy_time_animation;
 
 	bool (*fnUpdate)(struct Bubble*);
 	void (*fnDraw)(struct Bubble*, int, int);
 } Bubble;
 
 Bubble* BubbleCreate(Color color);
+void BubbleMarkForDestroy(Bubble* bubble);
 void BubbleDestroy(Bubble* bubble);
 
 #endif // _BUBBLE_H_

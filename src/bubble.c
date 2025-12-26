@@ -3,8 +3,6 @@
 
 #include <stdlib.h>
 
-#define ADD_ANIMATION_TIME 0.3f
-
 
 static bool UpdateBubble(Bubble* bubble)
 {
@@ -15,6 +13,12 @@ static bool UpdateBubble(Bubble* bubble)
 	{
 		bubble->radius -= max_radius * (bubble->add_time_animation / ADD_ANIMATION_TIME);
 		bubble->add_time_animation = max(0.f, bubble->add_time_animation - GetFrameTime());
+		return false;
+	}
+	else if (bubble->destroy_time_animation > 0.f)
+	{
+		bubble->radius = max_radius * (bubble->destroy_time_animation / ADD_ANIMATION_TIME);
+		bubble->destroy_time_animation = max(0.f, bubble->destroy_time_animation - GetFrameTime());
 		return false;
 	}
 	return true;
@@ -40,12 +44,23 @@ Bubble* BubbleCreate(Color color)
 	if (bubble != NULL)
 	{
 		bubble->is_selected = false;
+		bubble->mark_for_destroy = false;
 		bubble->color = color;
+		bubble->destroy_time_animation = 0.f;
 		bubble->add_time_animation = ADD_ANIMATION_TIME;
 		bubble->fnDraw = DrawBubble;
 		bubble->fnUpdate = UpdateBubble;
 	}
 	return bubble;
+}
+
+void BubbleMarkForDestroy(Bubble* bubble)
+{
+	if (bubble != NULL)
+	{
+		bubble->mark_for_destroy = true;
+		bubble->destroy_time_animation = ADD_ANIMATION_TIME;
+	}
 }
 
 void BubbleDestroy(Bubble* bubble)
