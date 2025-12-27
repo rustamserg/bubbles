@@ -1,6 +1,7 @@
 #include "game.h"
 #include "board.h"
-#include "dummy.h"
+#include "player.h"
+#include "ai.h"
 
 
 static void Update(Game* game)
@@ -78,8 +79,8 @@ void GameInit(Game* game)
 	game->min_matches = MIN_MATCHES_IN_ROW;
 
 	game->board = BoardCreate();
-	game->ai = DummyCreateAI();
-	game->player = DummyCreatePlayer();
+	game->ai = AICreate();
+	game->player = PlayerCreate();
 
 	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
 	{

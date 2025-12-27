@@ -1,11 +1,11 @@
-#include "dummy.h"
+#include "ai.h"
 #include "board.h"
 #include "game.h"
 
 #include <malloc.h>
 
 
-static bool Update(Dummy* dummy, Game* game)
+static bool Update(AI* ai, Game* game)
 {
 	int to_add = NUM_BUBBLES_TO_ADD;
 	bool is_board_filled = false;
@@ -28,9 +28,9 @@ static bool Update(Dummy* dummy, Game* game)
 	return true;
 }
 
-Dummy* DummyCreateAI()
+AI* AICreate()
 {
-	Dummy* ai = (Dummy*)malloc(sizeof(Dummy));
+	AI* ai = (AI*)malloc(sizeof(AI));
 
 	if (ai != NULL)
 	{

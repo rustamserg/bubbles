@@ -1,26 +1,13 @@
-#include "dummy.h"
+#include "player.h"
 #include "board.h"
 #include "bubble.h"
 #include "game.h"
 
-#include "raylib.h"
-
 #include <malloc.h>
 
 
-typedef struct Player
+static bool Update(Player* player, Game* game)
 {
-	Dummy base; // must be first to enable cast to player
-
-	Vector2 from;
-	bool is_turn_end;
-} Player;
-
-
-static bool Update(Dummy* dummy, Game* game)
-{
-	Player* player = (Player*)dummy;
-
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 	{
 		Vector2 mousePos = GetMousePosition();
@@ -70,7 +57,7 @@ static bool Update(Dummy* dummy, Game* game)
 	return false;
 }
 
-Dummy* DummyCreatePlayer()
+Player* PlayerCreate()
 {
 	Player* player = (Player*)malloc(sizeof(Player));
 
@@ -78,8 +65,8 @@ Dummy* DummyCreatePlayer()
 	{
 		player->from = (Vector2) { 0.f, 0.f };
 		player->is_turn_end = false;
-		player->base.fnUpdate = Update;
-		return &player->base;
+		player->fnUpdate = Update;
+		return player;
 	}
 	return NULL;
 }

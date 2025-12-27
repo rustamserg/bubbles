@@ -16,7 +16,8 @@
 #define ADD_ANIMATION_TIME 0.3f
 
 struct Board;
-struct Dummy;
+struct AI;
+struct Player;
 
 enum Turn
 {
@@ -28,8 +29,8 @@ typedef struct Game
 {
 	enum Turn turn;
 	struct Board* board;
-	struct Dummy* ai;
-	struct Dummy* player;
+	struct AI* ai;
+	struct Player* player;
 
 	int min_matches;
 	int score;
