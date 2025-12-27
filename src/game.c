@@ -8,6 +8,23 @@ static void Update(Game* game)
 	bool end_turn = game->board->fnUpdate(game->board, game);
 	if (end_turn)
 	{
+		if (game->board->destroyed_bubbles > 0)
+		{
+			if (game->board->destroyed_bubbles == game->min_matches)
+			{
+				game->score += 10;
+			}
+			else if (game->board->destroyed_bubbles > game->min_matches)
+			{
+				game->score += 15;
+			}
+
+			if (game->board->free_cells_count < BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT)
+			{
+				game->turn = TURN_PLAYER;
+			}
+		}
+
 		if (TURN_AI == game->turn)
 		{
 			end_turn = game->ai->fnUpdate(game->ai, game);

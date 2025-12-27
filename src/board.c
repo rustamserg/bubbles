@@ -209,7 +209,7 @@ static bool Update(Board* board, Game* game)
 	}
 
 	bool is_bubbles_updated = true;
-	int destroyed_bubbles = 0;
+	board->destroyed_bubbles = 0;
 
 	for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
 	{
@@ -226,19 +226,10 @@ static bool Update(Board* board, Game* game)
 					BubbleDestroy(bubble);
 					board->cells[w][h] = NULL;
 					board->free_cells_count++;
-					++destroyed_bubbles;
+					++board->destroyed_bubbles;
 				}
 			}
 		}
-	}
-
-	if (destroyed_bubbles == game->min_matches)
-	{
-		game->score += 10;
-	}
-	else if (destroyed_bubbles > game->min_matches)
-	{
-		game->score += 15;
 	}
 
 	return is_bubbles_updated;
@@ -356,6 +347,7 @@ Board* BoardCreate()
 		board->colors[7] = MAGENTA;
 
 		board->added_bubbles = 0;
+		board->destroyed_bubbles = 0;
 		board->free_cells_count = BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT;
 
 		board->fnGetNextColor = GetNextColor;

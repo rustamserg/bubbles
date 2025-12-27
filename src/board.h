@@ -13,6 +13,7 @@ typedef struct Board
 	struct Bubble* cells[BOARD_SIZE_WIDTH][BOARD_SIZE_HEIGHT];
 
 	int added_bubbles;
+	int destroyed_bubbles;
 	int last_update_h[NUM_BUBBLES_TO_ADD];
 	int last_update_w[NUM_BUBBLES_TO_ADD];
 	int free_cells_count;
