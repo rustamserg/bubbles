@@ -2,6 +2,7 @@
 #include "board.h"
 #include "player.h"
 #include "ai.h"
+#include "ui.h"
 
 
 static void Update(Game* game)
@@ -54,21 +55,13 @@ static void Update(Game* game)
 		}
 	}
 
-	// draw hud
-	DrawText(TextFormat("Score: %06i", game->score), 800, 110, 30, RED);
-
-	int x_pos = 260;
-	float radius = BOARD_CELL_SIZE / 2 - 10;
-	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
-	{
-		DrawCircle((int)(x_pos + i * 2 * (radius + 10)), (int)(BOARD_CELL_SIZE / 2 + 20), radius, game->next_colors[i]);
-	}
-	DrawText("Next bubbles", 240, 110, 30, BLUE);
+	game->ui->fnUpdate(game->ui, game);
 }
 
 static void Draw(Game* game)
 {
-	game->board->fnDraw(game->board, DRAW_OFFSET_X, DRAW_OFFSET_Y);
+	game->board->fnDraw(game->board);
+	game->ui->fnDraw(game->ui, game);
 }
 
 void GameInit(Game* game)
@@ -81,6 +74,7 @@ void GameInit(Game* game)
 	game->board = BoardCreate();
 	game->ai = AICreate();
 	game->player = PlayerCreate();
+	game->ui = UICreate();
 
 	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
 	{

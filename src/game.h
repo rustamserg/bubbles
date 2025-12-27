@@ -18,6 +18,7 @@
 struct Board;
 struct AI;
 struct Player;
+struct UI;
 
 enum Turn
 {
@@ -31,6 +32,7 @@ typedef struct Game
 	struct Board* board;
 	struct AI* ai;
 	struct Player* player;
+	struct UI* ui;
 
 	int min_matches;
 	int score;

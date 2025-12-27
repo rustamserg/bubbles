@@ -269,8 +269,11 @@ static void MoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 	}
 }
 
-static void DrawBoard(Board* board, int board_pos_x, int board_pos_y)
+static void DrawBoard(Board* board)
 {
+	int board_pos_x = DRAW_OFFSET_X;
+	int board_pos_y = DRAW_OFFSET_Y;
+
 	for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
 	{
 		for (int h = 0; h < BOARD_SIZE_HEIGHT; ++h)

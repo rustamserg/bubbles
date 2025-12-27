@@ -18,7 +18,7 @@ typedef struct Board
 	int last_update_w[NUM_BUBBLES_TO_ADD];
 	int free_cells_count;
 
-	void (*fnDraw)(struct Board*, int, int);
+	void (*fnDraw)(struct Board*);
 	bool (*fnUpdate)(struct Board*, struct Game*);
 
 	Color (*fnGetNextColor)(struct Board*);
