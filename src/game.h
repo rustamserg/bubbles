@@ -3,10 +3,10 @@
 
 #include "raylib.h"
 
-#define DRAW_OFFSET_X 20
-#define DRAW_OFFSET_Y 100
+#define DRAW_OFFSET_X 80
+#define DRAW_OFFSET_Y 200
 
-#define BOARD_SIZE_WIDTH 8
+#define BOARD_SIZE_WIDTH 14
 #define BOARD_SIZE_HEIGHT 8
 #define BOARD_CELL_SIZE 80
 #define BOARD_CELL_TYPES 8

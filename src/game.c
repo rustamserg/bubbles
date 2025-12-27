@@ -37,7 +37,15 @@ static void Update(Game* game)
 	}
 
 	// draw hud
-	DrawText(TextFormat("Score: %06i", game->score), 740, DRAW_OFFSET_Y, 30, BLUE);
+	DrawText(TextFormat("Score: %06i", game->score), 800, 110, 30, RED);
+
+	int x_pos = 260;
+	float radius = BOARD_CELL_SIZE / 2 - 10;
+	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
+	{
+		DrawCircle((int)(x_pos + i * 2 * (radius + 10)), (int)(BOARD_CELL_SIZE / 2 + 20), radius, game->next_colors[i]);
+	}
+	DrawText("Next bubbles", 240, 110, 30, BLUE);
 }
 
 static void Draw(Game* game)
@@ -55,6 +63,11 @@ void GameInit(Game* game)
 	game->board = BoardCreate();
 	game->ai = DummyCreateAI();
 	game->player = DummyCreatePlayer();
+
+	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
+	{
+		game->next_colors[i] = game->board->fnGetNextColor(game->board);
+	}
 
 	game->fnDraw = Draw;
 	game->fnUpdate = Update;

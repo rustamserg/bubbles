@@ -12,9 +12,19 @@ static bool Update(Dummy* dummy, Game* game)
 
 	while (to_add-- && !is_board_filled)
 	{
-		Color clr = game->board->fnGetNextColor(game->board);
+		Color clr = game->next_colors[to_add];
 		is_board_filled = !game->board->fnAddBubble(game->board, clr);
 	}
+
+	if (!is_board_filled)
+	{
+		for (to_add = 0; to_add < NUM_BUBBLES_TO_ADD; ++to_add)
+		{
+			Color clr = game->board->fnGetNextColor(game->board);
+			game->next_colors[to_add] = clr;
+		}
+	}
+
 	return true;
 }
 

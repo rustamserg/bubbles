@@ -10,7 +10,7 @@ int main ()
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	// Create the window and OpenGL context
-	InitWindow(1024, 768, "Bubbles");
+	InitWindow(1280, 960, "Bubbles");
 
 	SetTargetFPS(60);
 	SetRandomSeed((unsigned int)time(NULL));
