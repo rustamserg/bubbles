@@ -1,8 +1,10 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#define DRAW_OFFSET_X 50
-#define DRAW_OFFSET_Y 50
+#include "raylib.h"
+
+#define DRAW_OFFSET_X 20
+#define DRAW_OFFSET_Y 100
 
 #define BOARD_SIZE_WIDTH 8
 #define BOARD_SIZE_HEIGHT 8
@@ -30,6 +32,9 @@ typedef struct Game
 	struct Dummy* player;
 
 	int min_matches;
+	int score;
+
+	Color next_colors[NUM_BUBBLES_TO_ADD];
 
 	void (*fnUpdate)(struct Game*);
 	void (*fnDraw)(struct Game*);

@@ -52,7 +52,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (w = w_from; w <= w_to; ++w)
 		{
 			Bubble* bubble = board->cells[w][h_added];
-			BubbleMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble);
 		}
 	}
 
@@ -91,7 +91,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w_added][h];
-			BubbleMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble);
 		}
 	}
 
@@ -141,7 +141,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w][h];
-			BubbleMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble);
 			++w;
 		}
 	}
@@ -192,7 +192,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w][h];
-			BubbleMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble);
 			--w;
 		}
 	}
@@ -209,6 +209,7 @@ static bool Update(Board* board, Game* game)
 	}
 
 	bool is_bubbles_updated = true;
+	int destroyed_bubbles = 0;
 
 	for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
 	{
@@ -222,12 +223,24 @@ static bool Update(Board* board, Game* game)
 
 				if (bubble->mark_for_destroy && is_updated)
 				{
+					BubbleDestroy(bubble);
 					board->cells[w][h] = NULL;
 					board->free_cells_count++;
+					++destroyed_bubbles;
 				}
 			}
 		}
 	}
+
+	if (destroyed_bubbles == game->min_matches)
+	{
+		game->score += 10;
+	}
+	else if (destroyed_bubbles > game->min_matches)
+	{
+		game->score += 15;
+	}
+
 	return is_bubbles_updated;
 }
 
@@ -282,7 +295,13 @@ static void DrawBoard(Board* board, int board_pos_x, int board_pos_y)
 	}
 }
 
-static bool AddBubble(Board* board)
+static Color GetNextColor(Board* board)
+{
+	Color clr = board->colors[GetRandomValue(0, BOARD_CELL_TYPES - 1)];
+	return clr;
+}
+
+static bool AddBubble(Board* board, Color clr)
 {
 	if (0 == board->free_cells_count)
 	{
@@ -299,7 +318,6 @@ static bool AddBubble(Board* board)
 			{
 				if (0 == occupy_cell_index)
 				{
-					Color clr = board->colors[GetRandomValue(0, BOARD_CELL_TYPES - 1)];
 					board->cells[w][h] = BubbleCreate(clr);
 
 					board->last_update_h[board->added_bubbles] = h;
@@ -340,6 +358,7 @@ Board* BoardCreate()
 		board->added_bubbles = 0;
 		board->free_cells_count = BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT;
 
+		board->fnGetNextColor = GetNextColor;
 		board->fnDraw = DrawBoard;
 		board->fnAddBubble = AddBubble;
 		board->fnTryGetBubble = TryGetBubble;

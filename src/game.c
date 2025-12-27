@@ -2,8 +2,6 @@
 #include "board.h"
 #include "dummy.h"
 
-#include "raylib.h"
-
 
 static void Update(Game* game)
 {
@@ -18,6 +16,7 @@ static void Update(Game* game)
 				if (0 == game->board->free_cells_count)
 				{
 					// TODO: game end here
+					game->score = 0;
 					BoardDestroy(game->board);
 					game->board = BoardCreate();
 				}
@@ -36,6 +35,9 @@ static void Update(Game* game)
 			}
 		}
 	}
+
+	// draw hud
+	DrawText(TextFormat("Score: %06i", game->score), 740, DRAW_OFFSET_Y, 30, BLUE);
 }
 
 static void Draw(Game* game)
@@ -45,6 +47,8 @@ static void Draw(Game* game)
 
 void GameInit(Game* game)
 {
+	game->score = 0;
+
 	game->turn = TURN_AI;
 	game->min_matches = MIN_MATCHES_IN_ROW;
 

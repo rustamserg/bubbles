@@ -37,6 +37,12 @@ static void DrawBubble(Bubble* bubble, int bubble_pos_x, int bubble_pos_y)
 	}
 }
 
+static void MarkForDestroy(Bubble* bubble)
+{
+	bubble->mark_for_destroy = true;
+	bubble->destroy_time_animation = ADD_ANIMATION_TIME;
+}
+
 Bubble* BubbleCreate(Color color)
 {
 	Bubble* bubble = (Bubble*)malloc(sizeof(Bubble));
@@ -49,18 +55,10 @@ Bubble* BubbleCreate(Color color)
 		bubble->destroy_time_animation = 0.f;
 		bubble->add_time_animation = ADD_ANIMATION_TIME;
 		bubble->fnDraw = DrawBubble;
+		bubble->fnMarkForDestroy = MarkForDestroy;
 		bubble->fnUpdate = UpdateBubble;
 	}
 	return bubble;
-}
-
-void BubbleMarkForDestroy(Bubble* bubble)
-{
-	if (bubble != NULL)
-	{
-		bubble->mark_for_destroy = true;
-		bubble->destroy_time_animation = ADD_ANIMATION_TIME;
-	}
 }
 
 void BubbleDestroy(Bubble* bubble)

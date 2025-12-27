@@ -20,7 +20,8 @@ typedef struct Board
 	void (*fnDraw)(struct Board*, int, int);
 	bool (*fnUpdate)(struct Board*, struct Game*);
 
-	bool (*fnAddBubble)(struct Board*);
+	Color (*fnGetNextColor)(struct Board*);
+	bool (*fnAddBubble)(struct Board*, Color);
 	void (*fnMoveBubble)(struct Board*, Vector2, Vector2);
 	struct Bubble* (*fnTryGetBubble)(struct Board*, Vector2);
 } Board;

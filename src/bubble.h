@@ -15,10 +15,10 @@ typedef struct Bubble
 
 	bool (*fnUpdate)(struct Bubble*);
 	void (*fnDraw)(struct Bubble*, int, int);
+	void (*fnMarkForDestroy)(struct Bubble*);
 } Bubble;
 
 Bubble* BubbleCreate(Color color);
-void BubbleMarkForDestroy(Bubble* bubble);
 void BubbleDestroy(Bubble* bubble);
 
 #endif // _BUBBLE_H_
