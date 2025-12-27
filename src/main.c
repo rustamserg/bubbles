@@ -30,7 +30,7 @@ int main ()
 		BeginDrawing();
 
 		// Setup the back buffer for drawing (clear color and depth buffers)
-		ClearBackground(WHITE);
+		ClearBackground(RAYWHITE);
 
 		game.fnDraw(&game);
 

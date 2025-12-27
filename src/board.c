@@ -278,6 +278,7 @@ static void DrawBoard(Board* board)
 	{
 		for (int h = 0; h < BOARD_SIZE_HEIGHT; ++h)
 		{
+			DrawRectangle(board_pos_x + w * BOARD_CELL_SIZE, board_pos_y + h * BOARD_CELL_SIZE, BOARD_CELL_SIZE, BOARD_CELL_SIZE, BEIGE);
 			DrawRectangleLines(board_pos_x + w * BOARD_CELL_SIZE, board_pos_y + h * BOARD_CELL_SIZE, BOARD_CELL_SIZE, BOARD_CELL_SIZE, BLACK);
 
 			Bubble* bubble = board->cells[w][h];
