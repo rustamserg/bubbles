@@ -8,6 +8,7 @@ struct Game;
 
 typedef struct UI
 {
+	Texture branch;
 	Texture spikes;
 	Texture web;
 	Texture spider;
