@@ -58,6 +58,16 @@ static void Draw(UI* ui, Game* game)
 		);
 	}
 	DrawGlowText(font, "Next bubbles", (Vector2) { 240, 110 }, 40, BLUE);
+
+	DrawTexture(ui->spikes, 1250, 700, WHITE);
+
+	float spiderY = 700;
+	if (game->board->free_cells_count > 0)
+	{
+		spiderY = 100.f + 500.f * (1.f - ((float)game->board->free_cells_count / (BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT))); // 100 -> 700
+	}
+	DrawTextureRec(ui->web, (Rectangle) { 0, 0, 300.f, spiderY - 100.f + 100.f }, (Vector2) { 1250, 100 }, BLACK);
+	DrawTexture(ui->spider, 1250, (int)spiderY, WHITE);
 }
 
 UI* UICreate()
@@ -66,6 +76,10 @@ UI* UICreate()
 
 	if (ui != NULL)
 	{
+		ui->spikes = LoadTexture("spikes.png");
+		ui->spider = LoadTexture("spider.png");
+		ui->web = LoadTexture("web.png");
+
 		ui->fnDraw = Draw;
 		ui->fnUpdate = Update;
 	}
