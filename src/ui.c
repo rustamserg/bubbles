@@ -19,7 +19,13 @@ static void Draw(UI* ui, Game* game)
 	float radius = BOARD_CELL_SIZE / 2 - 10;
 	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
 	{
-		DrawCircle((int)(x_pos + i * 2 * (radius + 10)), (int)(BOARD_CELL_SIZE / 2 + 20), radius, game->next_colors[i]);
+		DrawCircleGradient(
+			(int)(x_pos + i * 2 * (radius + 10)),
+			(int)(BOARD_CELL_SIZE / 2 + 20),
+			radius,
+			WHITE,
+			game->next_colors[i]
+		);
 	}
 	DrawText("Next bubbles", 240, 110, 30, BLUE);
 }

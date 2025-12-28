@@ -342,13 +342,13 @@ Board* BoardCreate()
 		}
 
 		board->colors[0] = GREEN;
-		board->colors[1] = RED;
+		board->colors[1] = BROWN;
 		board->colors[2] = BLUE;
 		board->colors[3] = YELLOW;
 		board->colors[4] = VIOLET;
 		board->colors[5] = ORANGE;
-		board->colors[6] = BEIGE;
-		board->colors[7] = MAGENTA;
+		board->colors[6] = PINK;
+		board->colors[7] = RED;
 
 		board->added_bubbles = 0;
 		board->destroyed_bubbles = 0;

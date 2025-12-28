@@ -26,7 +26,13 @@ static bool UpdateBubble(Bubble* bubble)
 
 static void DrawBubble(Bubble* bubble, int bubble_pos_x, int bubble_pos_y)
 {
-	DrawCircle(bubble_pos_x + BOARD_CELL_SIZE / 2, bubble_pos_y + BOARD_CELL_SIZE / 2, bubble->radius, bubble->color);
+	DrawCircleGradient(
+		bubble_pos_x + BOARD_CELL_SIZE / 2,
+		bubble_pos_y + BOARD_CELL_SIZE / 2,
+		bubble->radius,
+		WHITE,
+		bubble->color
+	);
 
 	if (bubble->is_selected)
 	{
@@ -49,6 +55,7 @@ Bubble* BubbleCreate(Color color)
 
 	if (bubble != NULL)
 	{
+		bubble->radius = 0.f;
 		bubble->is_selected = false;
 		bubble->mark_for_destroy = false;
 		bubble->color = color;
