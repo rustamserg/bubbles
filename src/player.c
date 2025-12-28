@@ -12,6 +12,9 @@ static bool Update(Player* player, Game* game)
 	{
 		Vector2 mousePos = GetMousePosition();
 
+		mousePos.x = VIRTUAL_SCREEN_WIDTH * (mousePos.x / GetScreenWidth());
+		mousePos.y = VIRTUAL_SCREEN_HEIGHT * (mousePos.y / GetScreenHeight());
+
 		if (0.f == player->from.x && 0.f == player->from.y)
 		{
 			Bubble* bubble = game->board->fnTryGetBubble(game->board, (Vector2) { mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y });

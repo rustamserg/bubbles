@@ -10,7 +10,7 @@ int main ()
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	// Create the window and OpenGL context
-	InitWindow(1280, 960, "Bubbles");
+	InitWindow(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT, "Bubbles");
 
 	SetTargetFPS(60);
 	SetRandomSeed((unsigned int)time(NULL));
@@ -18,7 +18,7 @@ int main ()
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
 
-	RenderTexture2D target = LoadRenderTexture(1280, 960);
+	RenderTexture2D target = LoadRenderTexture(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT);
 
 	Shader crt = LoadShader(0, "crt.fs");
 
@@ -50,6 +50,26 @@ int main ()
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
+		// Check for Alt + Enter key press to toggle fullscreen
+		if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
+		{
+			int display = GetCurrentMonitor();
+
+			if (IsWindowFullscreen())
+			{
+				// If we are full screen, then go back to the windowed size
+				SetWindowSize(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT);
+			}
+			else
+			{
+				// If we are not full screen, set the window size to match the monitor we are on
+				SetWindowSize(GetMonitorWidth(display), GetMonitorHeight(display));
+			}
+
+			// Toggle the state
+			ToggleFullscreen();
+		}
+
 		game.fnUpdate(&game);
 
 		// 1) draw your world to target
@@ -69,7 +89,7 @@ int main ()
 
 		// Draw
 		BeginDrawing();
-		ClearBackground(RAYWHITE);
+		ClearBackground(BLACK);
 
 		BeginShaderMode(crt);
 
@@ -78,7 +98,7 @@ int main ()
 		Rectangle src = { 0, 0, (float)target.texture.width, -(float)target.texture.height };
 		Rectangle dst = { 0, 0, (float)GetScreenWidth(), (float)GetScreenHeight() };
 
-		DrawTexturePro(target.texture, src, dst, (Vector2) { 0, 0 }, 0.0f, RAYWHITE);
+		DrawTexturePro(target.texture, src, dst, (Vector2) { 0, 0 }, 0.0f, BLACK);
 
 		EndShaderMode();
 

@@ -3,6 +3,8 @@
 #include "game.h"
 
 #include "raylib.h"
+
+#include <math.h>
 #include <malloc.h>
 
 
@@ -11,9 +13,37 @@ static bool Update(UI* ui, Game* game)
 	return true;
 }
 
+static void DrawGlowText(Font font, const char* text, Vector2 pos, float size, Color color)
+{
+	// Glow
+	for (int i = 6; i > 0; --i)
+	{
+		DrawTextEx(font, text, (Vector2) { pos.x - i, pos.y }, size, 2, Fade(color, 0.05f));
+	}
+
+	// Outline
+	DrawTextEx(font, text, (Vector2) { pos.x - 2, pos.y }, size, 2, BLACK);
+	DrawTextEx(font, text, (Vector2) { pos.x + 2, pos.y }, size, 2, BLACK);
+	DrawTextEx(font, text, (Vector2) { pos.x, pos.y - 2 }, size, 2, BLACK);
+	DrawTextEx(font, text, (Vector2) { pos.x, pos.y + 2 }, size, 2, BLACK);
+
+	// Main text
+	DrawTextEx(font, text, pos, size, 2, color);
+}
+
+static void DrawEffectText(Font font, const char* text, Vector2 pos, float size, Color c1, Color c2)
+{
+	float t = (float)GetTime();
+	float scale = 1.0f + sinf(t * 4.0f) * 0.05f;
+
+	DrawTextPro(font, text, pos, (Vector2) { MeasureTextEx(font, text, 48, 2).x / 2, 0 }, sinf(t) * 2.0f, size * scale, 2, ColorLerp(c1, c2, (sinf(t) + 1) * 0.5f));
+}
+
 static void Draw(UI* ui, Game* game)
 {
-	DrawText(TextFormat("Score: %06i", game->score), 800, 110, 30, RED);
+	Font font = GetFontDefault();
+
+	DrawGlowText(font, TextFormat("Score: %06i", game->score), (Vector2) { 800, 110 }, 40, RED);
 
 	int x_pos = 260;
 	float radius = BOARD_CELL_SIZE / 2 - 10;
@@ -27,7 +57,7 @@ static void Draw(UI* ui, Game* game)
 			game->next_colors[i]
 		);
 	}
-	DrawText("Next bubbles", 240, 110, 30, BLUE);
+	DrawGlowText(font, "Next bubbles", (Vector2) { 240, 110 }, 40, BLUE);
 }
 
 UI* UICreate()

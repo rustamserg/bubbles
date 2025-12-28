@@ -3,6 +3,9 @@
 
 #include "raylib.h"
 
+#define VIRTUAL_SCREEN_WIDTH 1600
+#define VIRTUAL_SCREEN_HEIGHT 900
+
 #define DRAW_OFFSET_X 80
 #define DRAW_OFFSET_Y 200
 
