@@ -5,9 +5,20 @@
 #include <stdbool.h>
 
 struct Game;
+struct ScoreDef;
+
+typedef struct ScoreMessage
+{
+	char message[100];
+	float display_time;
+} ScoreMessage;
 
 typedef struct UI
 {
+	int push_score_msg_id;
+	int pop_score_msg_id;
+	ScoreMessage score_msgs[10];
+
 	Texture branch;
 	Texture spikes;
 	Texture web;
@@ -15,6 +26,8 @@ typedef struct UI
 
 	bool (*fnUpdate)(struct UI*, struct Game*);
 	void (*fnDraw)(struct UI*, struct Game*);
+
+	void (*fnAddScoreMessage)(struct UI*, const struct ScoreDef*);
 } UI;
 
 UI* UICreate();

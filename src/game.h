@@ -14,6 +14,7 @@
 #define BOARD_CELL_SIZE 80
 #define BOARD_CELL_TYPES 8
 
+#define BASE_SCORE 5
 #define MIN_MATCHES_IN_ROW 5
 #define NUM_BUBBLES_TO_ADD 3
 #define ADD_ANIMATION_TIME 0.3f
@@ -29,6 +30,14 @@ enum Turn
 	TURN_PLAYER
 };
 
+typedef struct ScoreDef
+{
+	int destroyed_bubbles;
+	int base_score;
+	int multiplayer;
+	const char* message;
+} ScoreDef;
+
 typedef struct Game
 {
 	enum Turn turn;
@@ -38,7 +47,8 @@ typedef struct Game
 	struct UI* ui;
 
 	int min_matches;
-	int score;
+	int total_score;
+	ScoreDef score_ladder[5];
 
 	Color next_colors[NUM_BUBBLES_TO_ADD];
 

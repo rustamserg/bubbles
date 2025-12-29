@@ -5,6 +5,26 @@
 #include "ui.h"
 
 
+static void ProcessScore(Game* game)
+{
+	int ladder_id = 0;
+	const int max_ladder_id = sizeof(game->score_ladder) / sizeof(game->score_ladder[0]) - 1;
+
+	while (ladder_id <= max_ladder_id)
+	{
+		if (game->board->destroyed_bubbles <= game->score_ladder[ladder_id].destroyed_bubbles)
+		{
+			break;
+		}
+		++ladder_id;
+	}
+	ladder_id = (ladder_id <= max_ladder_id) ? ladder_id : max_ladder_id;
+
+	game->total_score += game->score_ladder[ladder_id].base_score * game->score_ladder[ladder_id].multiplayer;
+
+	game->ui->fnAddScoreMessage(game->ui, &game->score_ladder[ladder_id]);
+}
+
 static void Update(Game* game)
 {
 	bool end_turn = game->board->fnUpdate(game->board, game);
@@ -12,14 +32,7 @@ static void Update(Game* game)
 	{
 		if (game->board->destroyed_bubbles > 0)
 		{
-			if (game->board->destroyed_bubbles == game->min_matches)
-			{
-				game->score += 10;
-			}
-			else if (game->board->destroyed_bubbles > game->min_matches)
-			{
-				game->score += 15;
-			}
+			ProcessScore(game);
 
 			if (game->board->free_cells_count < BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT)
 			{
@@ -35,7 +48,7 @@ static void Update(Game* game)
 				if (0 == game->board->free_cells_count)
 				{
 					// TODO: game end here
-					game->score = 0;
+					game->total_score = 0;
 					BoardDestroy(game->board);
 					game->board = BoardCreate();
 				}
@@ -66,7 +79,12 @@ static void Draw(Game* game)
 
 void GameInit(Game* game)
 {
-	game->score = 0;
+	game->total_score = 0;
+	game->score_ladder[0] = (ScoreDef){ MIN_MATCHES_IN_ROW, BASE_SCORE, 1, "GOOD" };
+	game->score_ladder[1] = (ScoreDef){ MIN_MATCHES_IN_ROW + 1, (int)(BASE_SCORE + 0.5f * BASE_SCORE), 1, "VERY GOOD" };
+	game->score_ladder[2] = (ScoreDef){ 2 * MIN_MATCHES_IN_ROW, BASE_SCORE, 2, "AWESOME" };
+	game->score_ladder[3] = (ScoreDef){ 3 * MIN_MATCHES_IN_ROW, BASE_SCORE, 10, "EXCELLENT" };
+	game->score_ladder[4] = (ScoreDef){ 4 * MIN_MATCHES_IN_ROW, BASE_SCORE, 100, "AMAZING" };
 
 	game->turn = TURN_AI;
 	game->min_matches = MIN_MATCHES_IN_ROW;

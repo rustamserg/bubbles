@@ -4,12 +4,47 @@
 
 #include "raylib.h"
 
+#include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <malloc.h>
 
 
+static void AddScoreMessage(UI* ui, const ScoreDef* score)
+{
+	if (score->multiplayer > 1)
+	{
+		strcpy(ui->score_msgs[ui->push_score_msg_id].message,
+			TextFormat("+%i %s X%i", score->base_score * score->multiplayer, score->message, score->multiplayer));
+	}
+	else
+	{
+		strcpy(ui->score_msgs[ui->push_score_msg_id].message,
+			TextFormat("+%i %s", score->base_score, score->message));
+	}
+	ui->score_msgs[ui->push_score_msg_id].display_time = 3;
+
+	ui->push_score_msg_id++;
+	if (ui->push_score_msg_id == sizeof(ui->score_msgs) / sizeof(ui->score_msgs[0]))
+	{
+		ui->push_score_msg_id = 0;
+	}
+}
+
 static bool Update(UI* ui, Game* game)
 {
+	if (ui->pop_score_msg_id != ui->push_score_msg_id)
+	{
+		ui->score_msgs[ui->pop_score_msg_id].display_time = max(0.f, ui->score_msgs[ui->pop_score_msg_id].display_time - GetFrameTime());
+		if (0 == ui->score_msgs[ui->pop_score_msg_id].display_time)
+		{
+			ui->pop_score_msg_id++;
+			if (ui->pop_score_msg_id == sizeof(ui->score_msgs) / sizeof(ui->score_msgs[0]))
+			{
+				ui->pop_score_msg_id = 0;
+			}
+		}
+	}
 	return true;
 }
 
@@ -31,19 +66,11 @@ static void DrawGlowText(Font font, const char* text, Vector2 pos, float size, C
 	DrawTextEx(font, text, pos, size, 2, color);
 }
 
-static void DrawEffectText(Font font, const char* text, Vector2 pos, float size, Color c1, Color c2)
-{
-	float t = (float)GetTime();
-	float scale = 1.0f + sinf(t * 4.0f) * 0.05f;
-
-	DrawTextPro(font, text, pos, (Vector2) { MeasureTextEx(font, text, 48, 2).x / 2, 0 }, sinf(t) * 2.0f, size * scale, 2, ColorLerp(c1, c2, (sinf(t) + 1) * 0.5f));
-}
-
 static void Draw(UI* ui, Game* game)
 {
 	Font font = GetFontDefault();
 
-	DrawGlowText(font, TextFormat("Score: %06i", game->score), (Vector2) { 800, 110 }, 40, RED);
+	DrawGlowText(font, TextFormat("Score: %06i", game->total_score), (Vector2) { 800, 110 }, 40, RED);
 
 	int x_pos = 260;
 	float radius = BOARD_CELL_SIZE / 2 - 10;
@@ -58,6 +85,14 @@ static void Draw(UI* ui, Game* game)
 		);
 	}
 	DrawGlowText(font, "Next bubbles", (Vector2) { 240, 110 }, 40, BLUE);
+
+	if (ui->pop_score_msg_id != ui->push_score_msg_id)
+	{
+		if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
+		{
+			DrawGlowText(font, ui->score_msgs[ui->pop_score_msg_id].message, (Vector2) { 800, 50 }, 40, GOLD);
+		}
+	}
 
 	DrawTexture(ui->branch, 1200, -50, WHITE);
 	DrawTexture(ui->spikes, 1250, 730, WHITE);
@@ -77,11 +112,15 @@ UI* UICreate()
 
 	if (ui != NULL)
 	{
+		ui->push_score_msg_id = 0;
+		ui->pop_score_msg_id = 0;
+
 		ui->branch = LoadTexture("branch.png");
 		ui->spikes = LoadTexture("spikes.png");
 		ui->spider = LoadTexture("spider.png");
 		ui->web = LoadTexture("web.png");
 
+		ui->fnAddScoreMessage = AddScoreMessage;
 		ui->fnDraw = Draw;
 		ui->fnUpdate = Update;
 	}
