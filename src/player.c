@@ -2,11 +2,12 @@
 #include "board.h"
 #include "bubble.h"
 #include "game.h"
+#include "ui.h"
 
 #include <malloc.h>
 
 
-static bool Update(Player* player, Game* game)
+static bool GameUpdate(Player* player, Game* game)
 {
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 	{
@@ -58,6 +59,26 @@ static bool Update(Player* player, Game* game)
 		return true;
 	}
 	return false;
+}
+
+static bool Update(Player* player, Game* game)
+{
+	if (game->state == STATE_GAME)
+	{
+		return GameUpdate(player, game);
+	}
+	else
+	{
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			player->from = (Vector2) { 0.f, 0.f };
+			player->is_turn_end = false;
+
+			game->ui->fnNewGame(game->ui);
+			game->fnNewGame(game);
+		}
+	}
+	return true;
 }
 
 Player* PlayerCreate()

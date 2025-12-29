@@ -49,6 +49,13 @@ static bool Update(UI* ui, Game* game)
 	return true;
 }
 
+static void NewGame(UI* ui)
+{
+	ui->push_score_msg_id = 0;
+	ui->pop_score_msg_id = 0;
+	memset(ui->score_msgs, 0, sizeof(ui->score_msgs));
+}
+
 static void DrawGlowText(Font font, const char* text, Vector2 pos, float size, Color color)
 {
 	// Glow
@@ -71,37 +78,52 @@ static void Draw(UI* ui, Game* game)
 {
 	Font font = GetFontDefault();
 
-	DrawGlowText(font, TextFormat("Score: %08i", game->total_score), (Vector2) { 800, 110 }, 40, RED);
-
-	int x_pos = 260;
-	float radius = BOARD_CELL_SIZE / 2 - 10;
-	for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
+	if (game->state == STATE_GAME)
 	{
-		DrawCircleGradient(
-			(int)(x_pos + i * 2 * (radius + 10)),
-			(int)(BOARD_CELL_SIZE / 2 + 20),
-			radius,
-			WHITE,
-			game->next_colors[i]
-		);
-	}
-	DrawGlowText(font, "Next bubbles", (Vector2) { 240, 110 }, 40, BLUE);
+		DrawGlowText(font, TextFormat("Score: %08i", game->total_score), (Vector2) { 800, 110 }, 40, RED);
 
-	if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
+		int x_pos = 260;
+		float radius = BOARD_CELL_SIZE / 2 - 10;
+		for (int i = 0; i < sizeof(game->next_colors) / sizeof(game->next_colors[0]); ++i)
+		{
+			DrawCircleGradient(
+				(int)(x_pos + i * 2 * (radius + 10)),
+				(int)(BOARD_CELL_SIZE / 2 + 20),
+				radius,
+				WHITE,
+				game->next_colors[i]
+			);
+		}
+		DrawGlowText(font, "Next bubbles", (Vector2) { 240, 110 }, 40, BLUE);
+
+		if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
+		{
+			DrawGlowText(font, ui->score_msgs[ui->pop_score_msg_id].message, (Vector2) { 800, 50 }, 40, GOLD);
+		}
+
+		DrawTexture(ui->branch, 1200, -50, WHITE);
+		DrawTexture(ui->spikes, 1250, 730, WHITE);
+
+		float spiderY = 700;
+		if (game->board->free_cells_count > 0)
+		{
+			spiderY = 100.f + 500.f * (1.f - ((float)game->board->free_cells_count / (BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT))); // 100 -> 700
+		}
+		DrawTextureRec(ui->web, (Rectangle) { 0, 0, 300.f, spiderY + 100.f }, (Vector2) { 1250, 40 }, BLACK);
+		DrawTexture(ui->spider, 1250, (int)spiderY, WHITE);
+	}
+	else
 	{
-		DrawGlowText(font, ui->score_msgs[ui->pop_score_msg_id].message, (Vector2) { 800, 50 }, 40, GOLD);
-	}
+		const char* endMsg = "GAME OVER";
+		DrawGlowText(font, endMsg,
+			(Vector2) { VIRTUAL_SCREEN_WIDTH / 2 - (float)MeasureText(endMsg, 60) / 2, VIRTUAL_SCREEN_HEIGHT / 2 - 100 }, 60, RED);
 
-	DrawTexture(ui->branch, 1200, -50, WHITE);
-	DrawTexture(ui->spikes, 1250, 730, WHITE);
-
-	float spiderY = 700;
-	if (game->board->free_cells_count > 0)
-	{
-		spiderY = 100.f + 500.f * (1.f - ((float)game->board->free_cells_count / (BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT))); // 100 -> 700
+		char scoreMsg[100] = { 0 };
+		strcpy(scoreMsg, TextFormat("YOUR SCORE: %08i", game->total_score));
+		DrawGlowText(font, scoreMsg,
+			(Vector2) {
+			VIRTUAL_SCREEN_WIDTH / 2 - (float)MeasureText(scoreMsg, 60) / 2, VIRTUAL_SCREEN_HEIGHT / 2 }, 60, BLUE);
 	}
-	DrawTextureRec(ui->web, (Rectangle) { 0, 0, 300.f, spiderY + 100.f }, (Vector2) { 1250, 40 }, BLACK);
-	DrawTexture(ui->spider, 1250, (int)spiderY, WHITE);
 }
 
 UI* UICreate()
@@ -119,6 +141,7 @@ UI* UICreate()
 		ui->spider = LoadTexture("spider.png");
 		ui->web = LoadTexture("web.png");
 
+		ui->fnNewGame = NewGame;
 		ui->fnAddScoreMessage = AddScoreMessage;
 		ui->fnDraw = Draw;
 		ui->fnUpdate = Update;

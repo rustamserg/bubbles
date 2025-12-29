@@ -27,6 +27,7 @@ typedef struct UI
 	bool (*fnUpdate)(struct UI*, struct Game*);
 	void (*fnDraw)(struct UI*, struct Game*);
 
+	void (*fnNewGame)(struct UI*);
 	void (*fnAddScoreMessage)(struct UI*, const struct ScoreDef*, int);
 } UI;
 

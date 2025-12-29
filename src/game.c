@@ -18,72 +18,89 @@ static void ProcessScore(Game* game)
 	game->ui->fnAddScoreMessage(game->ui, &game->score_ladder[ladder_id], added_score);
 }
 
+static void NewGame(Game* game)
+{
+	game->state = STATE_GAME;
+	game->turn = TURN_AI;
+	game->total_score = 0;
+	game->current_strike = 0;
+	BoardDestroy(game->board);
+	game->board = BoardCreate();
+}
+
 static void Update(Game* game)
 {
-	bool end_turn = game->board->fnUpdate(game->board, game);
-	if (end_turn)
+	if (game->state == STATE_GAME)
 	{
-		if (game->board->destroyed_bubbles > 0)
+		bool end_turn = game->board->fnUpdate(game->board, game);
+		if (end_turn)
 		{
-			ProcessScore(game);
-
-			if (game->board->free_cells_count < BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT)
+			if (game->board->destroyed_bubbles > 0)
 			{
-				game->current_strike++;
-				game->turn = TURN_PLAYER;
-			}
-		}
+				ProcessScore(game);
 
-		if (TURN_AI == game->turn)
-		{
-			end_turn = game->ai->fnUpdate(game->ai, game);
-			if (end_turn)
-			{
-				if (0 == game->board->free_cells_count)
+				if (game->board->free_cells_count < BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT)
 				{
-					// TODO: game end here
-					game->total_score = 0;
-					BoardDestroy(game->board);
-					game->board = BoardCreate();
-				}
-				else
-				{
-					game->current_strike = 0;
+					game->current_strike++;
 					game->turn = TURN_PLAYER;
 				}
 			}
-		}
-		else if (TURN_PLAYER == game->turn)
-		{
-			end_turn = game->player->fnUpdate(game->player, game);
-			if (end_turn)
+
+			if (TURN_AI == game->turn)
 			{
-				game->turn = TURN_AI;
+				end_turn = game->ai->fnUpdate(game->ai, game);
+				if (end_turn)
+				{
+					if (0 == game->board->free_cells_count)
+					{
+						game->state = STATE_END;
+					}
+					else
+					{
+						game->current_strike = 0;
+						game->turn = TURN_PLAYER;
+					}
+				}
+			}
+			else if (TURN_PLAYER == game->turn)
+			{
+				end_turn = game->player->fnUpdate(game->player, game);
+				if (end_turn)
+				{
+					game->turn = TURN_AI;
+				}
 			}
 		}
 	}
-
+	else
+	{
+		game->player->fnUpdate(game->player, game);
+	}
 	game->ui->fnUpdate(game->ui, game);
 }
 
 static void Draw(Game* game)
 {
-	game->board->fnDraw(game->board);
+	if (game->state == STATE_GAME)
+	{
+		game->board->fnDraw(game->board);
+	}
 	game->ui->fnDraw(game->ui, game);
 }
 
 void GameInit(Game* game)
 {
 	game->total_score = 0;
+	game->current_strike = 0;
 	game->score_ladder[0] = (ScoreDef){ BASE_SCORE, 1, "GOOD" };
 	game->score_ladder[1] = (ScoreDef){ BASE_SCORE, 2, "VERY GOOD" };
 	game->score_ladder[2] = (ScoreDef){ BASE_SCORE * 2, 5, "AWESOME" };
 	game->score_ladder[3] = (ScoreDef){ BASE_SCORE * 3, 10, "EXCELLENT" };
 	game->score_ladder[4] = (ScoreDef){ BASE_SCORE * 4, 100, "AMAZING" };
 
+	game->state = STATE_GAME;
 	game->turn = TURN_AI;
 	game->min_matches = MIN_MATCHES_IN_ROW;
-	game->current_strike = 0;
 
 	game->board = BoardCreate();
 	game->ai = AICreate();
@@ -95,6 +112,7 @@ void GameInit(Game* game)
 		game->next_colors[i] = game->board->fnGetNextColor(game->board);
 	}
 
+	game->fnNewGame = NewGame;
 	game->fnDraw = Draw;
 	game->fnUpdate = Update;
 }

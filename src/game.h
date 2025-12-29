@@ -30,6 +30,12 @@ enum Turn
 	TURN_PLAYER
 };
 
+enum State
+{
+	STATE_GAME,
+	STATE_END
+};
+
 typedef struct ScoreDef
 {
 	int base_score;
@@ -39,6 +45,7 @@ typedef struct ScoreDef
 
 typedef struct Game
 {
+	enum State state;
 	enum Turn turn;
 	struct Board* board;
 	struct AI* ai;
@@ -52,6 +59,7 @@ typedef struct Game
 
 	Color next_colors[NUM_BUBBLES_TO_ADD];
 
+	void (*fnNewGame)(struct Game*);
 	void (*fnUpdate)(struct Game*);
 	void (*fnDraw)(struct Game*);
 } Game;
