@@ -247,7 +247,7 @@ static Bubble* TryGetBubble(Board* board, Vector2 hitPos)
 	return NULL;
 }
 
-static void MoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
+static bool TryMoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 {
 	int w_from = (int)(fromPos.x / BOARD_CELL_SIZE);
 	int h_from = (int)(fromPos.y / BOARD_CELL_SIZE);
@@ -259,14 +259,59 @@ static void MoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 	{
 		if (w_to < BOARD_SIZE_WIDTH && h_to < BOARD_SIZE_HEIGHT)
 		{
-			board->cells[w_to][h_to] = board->cells[w_from][h_from];
-			board->cells[w_from][h_from] = NULL;
+			int step = 1;
+			bool path_found = false;
+			bool stop_search = true;
+			memset(board->pathfind_cells, 0, sizeof(board->pathfind_cells));
+			board->pathfind_cells[w_from + 1][h_from + 1] = step;
 
-			board->last_update_h[0] = h_to;
-			board->last_update_w[0] = w_to;
-			board->added_bubbles = 1;
+			do
+			{
+				++step;
+				stop_search = true;
+
+				for (int w = 1; w <= BOARD_SIZE_WIDTH; ++w)
+				{
+					for (int h = 1; h <= BOARD_SIZE_HEIGHT; ++h)
+					{
+						if (board->cells[w - 1][h - 1] != NULL || board->pathfind_cells[w][h] != 0)
+						{
+							continue;
+						}
+						if ((board->pathfind_cells[w - 1][h] == step - 1) ||
+							(board->pathfind_cells[w - 1][h - 1] == step - 1) ||
+							(board->pathfind_cells[w][h - 1] == step - 1) ||
+							(board->pathfind_cells[w + 1][h - 1] == step - 1) ||
+							(board->pathfind_cells[w + 1][h] == step - 1) ||
+							(board->pathfind_cells[w + 1][h + 1] == step - 1) ||
+							(board->pathfind_cells[w][h + 1] == step - 1) ||
+							(board->pathfind_cells[w - 1][h + 1] == step - 1))
+						{
+							if (w == (w_to + 1) && h == (h_to + 1))
+							{
+								path_found = true;
+								break;
+							}
+							stop_search = false;
+							board->pathfind_cells[w][h] = step;
+						}
+					}
+				}
+			} while (!stop_search && !path_found);
+
+			if (path_found)
+			{
+				board->cells[w_to][h_to] = board->cells[w_from][h_from];
+				board->cells[w_from][h_from] = NULL;
+
+				board->last_update_h[0] = h_to;
+				board->last_update_w[0] = w_to;
+				board->added_bubbles = 1;
+			}
+			return path_found;
 		}
 	}
+	return false;
 }
 
 static void DrawBoard(Board* board)
@@ -285,6 +330,18 @@ static void DrawBoard(Board* board)
 			if (bubble)
 			{
 				bubble->fnDraw(bubble, board_pos_x + w * BOARD_CELL_SIZE, board_pos_y + h * BOARD_CELL_SIZE);
+			}
+		}
+	}
+
+	for (int w = 1; w <= BOARD_SIZE_WIDTH; ++w)
+	{
+		for (int h = 1; h <= BOARD_SIZE_HEIGHT; ++h)
+		{
+			if (board->pathfind_cells[w][h] > 0)
+			{
+				DrawText(TextFormat("%i", board->pathfind_cells[w][h]),
+					board_pos_x + (w - 1) * BOARD_CELL_SIZE + 30, board_pos_y + (h - 1) * BOARD_CELL_SIZE + 30, 30, BLACK);
 			}
 		}
 	}
@@ -358,7 +415,7 @@ Board* BoardCreate()
 		board->fnDraw = DrawBoard;
 		board->fnAddBubble = AddBubble;
 		board->fnTryGetBubble = TryGetBubble;
-		board->fnMoveBubble = MoveBubble;
+		board->fnTryMoveBubble = TryMoveBubble;
 		board->fnUpdate = Update;
 	}
 

@@ -74,6 +74,7 @@ static void Update(Game* game)
 	}
 	else
 	{
+		// update our player in end game coz it is our player controller and input here
 		game->player->fnUpdate(game->player, game);
 	}
 	game->ui->fnUpdate(game->ui, game);
