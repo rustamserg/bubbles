@@ -17,7 +17,7 @@ typedef struct UI
 {
 	int push_score_msg_id;
 	int pop_score_msg_id;
-	ScoreMessage score_msgs[10];
+	ScoreMessage score_msgs[3];
 
 	Texture branch;
 	Texture spikes;
@@ -27,7 +27,7 @@ typedef struct UI
 	bool (*fnUpdate)(struct UI*, struct Game*);
 	void (*fnDraw)(struct UI*, struct Game*);
 
-	void (*fnAddScoreMessage)(struct UI*, const struct ScoreDef*);
+	void (*fnAddScoreMessage)(struct UI*, const struct ScoreDef*, int);
 } UI;
 
 UI* UICreate();

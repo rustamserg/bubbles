@@ -7,22 +7,15 @@
 
 static void ProcessScore(Game* game)
 {
-	int ladder_id = 0;
+	int ladder_id = game->current_strike;
 	const int max_ladder_id = sizeof(game->score_ladder) / sizeof(game->score_ladder[0]) - 1;
 
-	while (ladder_id <= max_ladder_id)
-	{
-		if (game->board->destroyed_bubbles <= game->score_ladder[ladder_id].destroyed_bubbles)
-		{
-			break;
-		}
-		++ladder_id;
-	}
 	ladder_id = (ladder_id <= max_ladder_id) ? ladder_id : max_ladder_id;
 
-	game->total_score += game->score_ladder[ladder_id].base_score * game->score_ladder[ladder_id].multiplayer;
+	int added_score = (game->board->destroyed_bubbles * game->score_ladder[ladder_id].base_score) * game->score_ladder[ladder_id].multiplayer;
+	game->total_score += added_score;
 
-	game->ui->fnAddScoreMessage(game->ui, &game->score_ladder[ladder_id]);
+	game->ui->fnAddScoreMessage(game->ui, &game->score_ladder[ladder_id], added_score);
 }
 
 static void Update(Game* game)
@@ -36,6 +29,7 @@ static void Update(Game* game)
 
 			if (game->board->free_cells_count < BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT)
 			{
+				game->current_strike++;
 				game->turn = TURN_PLAYER;
 			}
 		}
@@ -54,6 +48,7 @@ static void Update(Game* game)
 				}
 				else
 				{
+					game->current_strike = 0;
 					game->turn = TURN_PLAYER;
 				}
 			}
@@ -80,14 +75,15 @@ static void Draw(Game* game)
 void GameInit(Game* game)
 {
 	game->total_score = 0;
-	game->score_ladder[0] = (ScoreDef){ MIN_MATCHES_IN_ROW, BASE_SCORE, 1, "GOOD" };
-	game->score_ladder[1] = (ScoreDef){ MIN_MATCHES_IN_ROW + 1, (int)(BASE_SCORE + 0.5f * BASE_SCORE), 1, "VERY GOOD" };
-	game->score_ladder[2] = (ScoreDef){ 2 * MIN_MATCHES_IN_ROW, BASE_SCORE, 2, "AWESOME" };
-	game->score_ladder[3] = (ScoreDef){ 3 * MIN_MATCHES_IN_ROW, BASE_SCORE, 10, "EXCELLENT" };
-	game->score_ladder[4] = (ScoreDef){ 4 * MIN_MATCHES_IN_ROW, BASE_SCORE, 100, "AMAZING" };
+	game->score_ladder[0] = (ScoreDef){ BASE_SCORE, 1, "GOOD" };
+	game->score_ladder[1] = (ScoreDef){ BASE_SCORE, 2, "VERY GOOD" };
+	game->score_ladder[2] = (ScoreDef){ BASE_SCORE * 2, 5, "AWESOME" };
+	game->score_ladder[3] = (ScoreDef){ BASE_SCORE * 3, 10, "EXCELLENT" };
+	game->score_ladder[4] = (ScoreDef){ BASE_SCORE * 4, 100, "AMAZING" };
 
 	game->turn = TURN_AI;
 	game->min_matches = MIN_MATCHES_IN_ROW;
+	game->current_strike = 0;
 
 	game->board = BoardCreate();
 	game->ai = AICreate();

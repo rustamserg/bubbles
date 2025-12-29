@@ -10,17 +10,17 @@
 #include <malloc.h>
 
 
-static void AddScoreMessage(UI* ui, const ScoreDef* score)
+static void AddScoreMessage(UI* ui, const ScoreDef* score, int added_score)
 {
 	if (score->multiplayer > 1)
 	{
 		strcpy(ui->score_msgs[ui->push_score_msg_id].message,
-			TextFormat("+%i %s X%i", score->base_score * score->multiplayer, score->message, score->multiplayer));
+			TextFormat("+%i %s X%i", added_score, score->message, score->multiplayer));
 	}
 	else
 	{
 		strcpy(ui->score_msgs[ui->push_score_msg_id].message,
-			TextFormat("+%i %s", score->base_score, score->message));
+			TextFormat("+%i %s", added_score, score->message));
 	}
 	ui->score_msgs[ui->push_score_msg_id].display_time = 3;
 
@@ -33,9 +33,10 @@ static void AddScoreMessage(UI* ui, const ScoreDef* score)
 
 static bool Update(UI* ui, Game* game)
 {
-	if (ui->pop_score_msg_id != ui->push_score_msg_id)
+	if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
 	{
 		ui->score_msgs[ui->pop_score_msg_id].display_time = max(0.f, ui->score_msgs[ui->pop_score_msg_id].display_time - GetFrameTime());
+
 		if (0 == ui->score_msgs[ui->pop_score_msg_id].display_time)
 		{
 			ui->pop_score_msg_id++;
@@ -70,7 +71,7 @@ static void Draw(UI* ui, Game* game)
 {
 	Font font = GetFontDefault();
 
-	DrawGlowText(font, TextFormat("Score: %06i", game->total_score), (Vector2) { 800, 110 }, 40, RED);
+	DrawGlowText(font, TextFormat("Score: %08i", game->total_score), (Vector2) { 800, 110 }, 40, RED);
 
 	int x_pos = 260;
 	float radius = BOARD_CELL_SIZE / 2 - 10;
@@ -86,12 +87,9 @@ static void Draw(UI* ui, Game* game)
 	}
 	DrawGlowText(font, "Next bubbles", (Vector2) { 240, 110 }, 40, BLUE);
 
-	if (ui->pop_score_msg_id != ui->push_score_msg_id)
+	if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
 	{
-		if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
-		{
-			DrawGlowText(font, ui->score_msgs[ui->pop_score_msg_id].message, (Vector2) { 800, 50 }, 40, GOLD);
-		}
+		DrawGlowText(font, ui->score_msgs[ui->pop_score_msg_id].message, (Vector2) { 800, 50 }, 40, GOLD);
 	}
 
 	DrawTexture(ui->branch, 1200, -50, WHITE);
@@ -114,6 +112,7 @@ UI* UICreate()
 	{
 		ui->push_score_msg_id = 0;
 		ui->pop_score_msg_id = 0;
+		memset(ui->score_msgs, 0, sizeof(ui->score_msgs));
 
 		ui->branch = LoadTexture("branch.png");
 		ui->spikes = LoadTexture("spikes.png");

@@ -32,7 +32,6 @@ enum Turn
 
 typedef struct ScoreDef
 {
-	int destroyed_bubbles;
 	int base_score;
 	int multiplayer;
 	const char* message;
@@ -47,6 +46,7 @@ typedef struct Game
 	struct UI* ui;
 
 	int min_matches;
+	int current_strike;
 	int total_score;
 	ScoreDef score_ladder[5];
 
