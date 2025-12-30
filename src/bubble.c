@@ -1,5 +1,6 @@
 #include "bubble.h"
-#include "board.h"
+#include "game.h"
+#include "ui.h"
 
 #include <stdlib.h>
 
@@ -43,8 +44,12 @@ static void DrawBubble(Bubble* bubble, int bubble_pos_x, int bubble_pos_y)
 	}
 }
 
-static void MarkForDestroy(Bubble* bubble)
+static void MarkForDestroy(Bubble* bubble, Game* game)
 {
+	if (!bubble->mark_for_destroy)
+	{
+		game->ui->fnAddSoundMessage(game->ui, &game->ui->sound_bubble_destroy, 0.1f);
+	}
 	bubble->mark_for_destroy = true;
 	bubble->destroy_time_animation = BUBBLE_ADD_ANIMATION_TIME;
 }

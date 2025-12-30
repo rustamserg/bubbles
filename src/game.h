@@ -21,6 +21,8 @@
 #define BUBBLE_ADD_ANIMATION_TIME 0.3f
 #define BUBBLE_MOVE_ANIMATION_TIME 0.01f
 
+#define UI_SCORE_MESSAGE_DISPLAY_TIME 2.f
+
 struct Board;
 struct AI;
 struct Player;

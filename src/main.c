@@ -12,6 +12,8 @@ int main ()
 	// Create the window and OpenGL context
 	InitWindow(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT, "Bubbles");
 
+	InitAudioDevice();
+
 	SetTargetFPS(60);
 	SetRandomSeed((unsigned int)time(NULL));
 
@@ -47,9 +49,15 @@ int main ()
 	Game game;
 	GameInit(&game);
 	
+	Music back_music = LoadMusicStream("background.wav");
+	SetMusicVolume(back_music, 0.5f);
+	PlayMusicStream(back_music);
+
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
+		UpdateMusicStream(back_music);
+
 		// Check for Alt + Enter key press to toggle fullscreen
 		if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
 		{
@@ -104,6 +112,9 @@ int main ()
 
 		EndDrawing();
 	}
+
+	UnloadMusicStream(back_music);
+	CloseAudioDevice();
 
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();

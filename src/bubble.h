@@ -3,6 +3,8 @@
 
 #include "raylib.h"
 
+struct Game;
+
 typedef struct Bubble
 {
 	Color color;
@@ -15,7 +17,7 @@ typedef struct Bubble
 
 	bool (*fnUpdate)(struct Bubble*);
 	void (*fnDraw)(struct Bubble*, int, int);
-	void (*fnMarkForDestroy)(struct Bubble*);
+	void (*fnMarkForDestroy)(struct Bubble*, struct Game*);
 } Bubble;
 
 Bubble* BubbleCreate(Color color);

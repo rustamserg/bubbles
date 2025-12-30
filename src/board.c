@@ -2,7 +2,6 @@
 #include "bubble.h"
 
 #include <malloc.h>
-#include <string.h>
 
 
 static bool IsBubbleMatchColor(Bubble* bubble, Color color)
@@ -53,7 +52,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (w = w_from; w <= w_to; ++w)
 		{
 			Bubble* bubble = board->cells[w][h_added];
-			bubble->fnMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble, game);
 		}
 	}
 
@@ -92,7 +91,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w_added][h];
-			bubble->fnMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble, game);
 		}
 	}
 
@@ -142,7 +141,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w][h];
-			bubble->fnMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble, game);
 			++w;
 		}
 	}
@@ -193,7 +192,7 @@ static void FindMatches(Board* board, Game* game, int h_added, int w_added)
 		for (h = h_from; h <= h_to; ++h)
 		{
 			Bubble* bubble = board->cells[w][h];
-			bubble->fnMarkForDestroy(bubble);
+			bubble->fnMarkForDestroy(bubble, game);
 			--w;
 		}
 	}

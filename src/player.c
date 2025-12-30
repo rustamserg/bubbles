@@ -41,7 +41,7 @@ static bool GameUpdate(Player* player, Game* game)
 				}
 				else
 				{
-					// TODO: play "cannot move" sound here
+					game->ui->fnAddSoundMessage(game->ui, &game->ui->sound_bubble_cannot_move, 1.f);
 				}
 			}
 			else
