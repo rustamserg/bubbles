@@ -12,6 +12,9 @@ typedef struct Board
 	Color colors[BOARD_CELL_TYPES];
 	struct Bubble* cells[BOARD_SIZE_WIDTH][BOARD_SIZE_HEIGHT];
 
+	int pathfind_current_step;
+	float pathfind_step_time;
+	Vector2 pathfind_path[BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT];
 	int pathfind_cells[BOARD_SIZE_WIDTH + 2][BOARD_SIZE_HEIGHT + 2];
 
 	int added_bubbles;

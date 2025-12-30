@@ -17,7 +17,9 @@
 #define BASE_SCORE 5
 #define MIN_MATCHES_IN_ROW 5
 #define NUM_BUBBLES_TO_ADD 3
-#define ADD_ANIMATION_TIME 0.3f
+
+#define BUBBLE_ADD_ANIMATION_TIME 0.3f
+#define BUBBLE_MOVE_ANIMATION_TIME 0.01f
 
 struct Board;
 struct AI;

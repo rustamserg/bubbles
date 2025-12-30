@@ -2,6 +2,7 @@
 #include "bubble.h"
 
 #include <malloc.h>
+#include <string.h>
 
 
 static bool IsBubbleMatchColor(Bubble* bubble, Color color)
@@ -232,7 +233,41 @@ static bool Update(Board* board, Game* game)
 		}
 	}
 
-	return is_bubbles_updated;
+	bool is_bubble_moved = true;
+
+	if (board->pathfind_path[board->pathfind_current_step].x > 0)
+	{
+		is_bubble_moved = false;
+		board->pathfind_step_time += GetFrameTime();
+
+		if (board->pathfind_step_time > BUBBLE_MOVE_ANIMATION_TIME)
+		{
+			board->pathfind_step_time -= BUBBLE_MOVE_ANIMATION_TIME;
+			int w_from = board->pathfind_path[board->pathfind_current_step].x - 1;
+			int h_from = board->pathfind_path[board->pathfind_current_step].y - 1;
+
+			board->pathfind_current_step++;
+			int w_to = board->pathfind_path[board->pathfind_current_step].x - 1;
+			int h_to = board->pathfind_path[board->pathfind_current_step].y - 1;
+
+			if (board->pathfind_path[board->pathfind_current_step].x == 0)
+			{
+				board->pathfind_current_step = 0;
+				board->pathfind_step_time = 0;
+				memset(board->pathfind_path, 0, sizeof(board->pathfind_path));
+
+				board->last_update_h[0] = h_from;
+				board->last_update_w[0] = w_from;
+				board->added_bubbles = 1;
+			}
+			else
+			{
+				board->cells[w_to][h_to] = board->cells[w_from][h_from];
+				board->cells[w_from][h_from] = NULL;
+			}
+		}
+	}
+	return is_bubbles_updated && is_bubble_moved;
 }
 
 static Bubble* TryGetBubble(Board* board, Vector2 hitPos)
@@ -262,9 +297,15 @@ static bool TryMoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 			int step = 1;
 			bool path_found = false;
 			bool stop_search = true;
-			memset(board->pathfind_cells, 0, sizeof(board->pathfind_cells));
-			board->pathfind_cells[w_from + 1][h_from + 1] = step;
 
+			// pathfinding board is wider than origin to simplify borders validations
+			memset(board->pathfind_cells, 0, sizeof(board->pathfind_cells));
+			memset(board->pathfind_path, 0, sizeof(board->pathfind_path));
+			board->pathfind_cells[w_from + 1][h_from + 1] = step;
+			board->pathfind_current_step = 0;
+			board->pathfind_step_time = 0;
+
+			// wave algorithm to avoid heavy recursion
 			do
 			{
 				++step;
@@ -287,13 +328,15 @@ static bool TryMoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 							(board->pathfind_cells[w][h + 1] == step - 1) ||
 							(board->pathfind_cells[w - 1][h + 1] == step - 1))
 						{
+							stop_search = false;
+							board->pathfind_cells[w][h] = step;
+
+							// reach destination point, path is found
 							if (w == (w_to + 1) && h == (h_to + 1))
 							{
 								path_found = true;
 								break;
 							}
-							stop_search = false;
-							board->pathfind_cells[w][h] = step;
 						}
 					}
 				}
@@ -301,12 +344,67 @@ static bool TryMoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 
 			if (path_found)
 			{
-				board->cells[w_to][h_to] = board->cells[w_from][h_from];
-				board->cells[w_from][h_from] = NULL;
+				// trace back to "from" position to build move path
+				int w_back = w_to + 1;
+				int h_back = h_to + 1;
+				board->pathfind_path[step - 1] = (Vector2){ w_back, h_back };
 
-				board->last_update_h[0] = h_to;
-				board->last_update_w[0] = w_to;
-				board->added_bubbles = 1;
+				while (--step > 0)
+				{
+					if (board->pathfind_cells[w_back - 1][h_back] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back - 1, h_back };
+						w_back = w_back - 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back - 1][h_back - 1] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back - 1, h_back - 1 };
+						w_back = w_back - 1;
+						h_back = h_back - 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back][h_back - 1] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back, h_back - 1 };
+						h_back = h_back - 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back + 1][h_back - 1] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back + 1, h_back - 1 };
+						w_back = w_back + 1;
+						h_back = h_back - 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back + 1][h_back] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back + 1, h_back };
+						w_back = w_back + 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back + 1][h_back + 1] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back + 1, h_back + 1 };
+						w_back = w_back + 1;
+						h_back = h_back + 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back][h_back + 1] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back, h_back + 1 };
+						h_back = h_back + 1;
+						continue;
+					}
+					if (board->pathfind_cells[w_back - 1][h_back + 1] == step)
+					{
+						board->pathfind_path[step - 1] = (Vector2){ w_back - 1, h_back + 1 };
+						w_back = w_back - 1;
+						h_back = h_back + 1;
+						continue;
+					}
+					break;
+				}
 			}
 			return path_found;
 		}
@@ -334,6 +432,8 @@ static void DrawBoard(Board* board)
 		}
 	}
 
+	// pathfinding debug draw
+#if 0
 	for (int w = 1; w <= BOARD_SIZE_WIDTH; ++w)
 	{
 		for (int h = 1; h <= BOARD_SIZE_HEIGHT; ++h)
@@ -345,6 +445,22 @@ static void DrawBoard(Board* board)
 			}
 		}
 	}
+#endif
+
+#if 0
+	for (int step_idx = 0; step_idx < sizeof(board->pathfind_path) / sizeof(board->pathfind_path[0]); ++step_idx)
+	{
+		if (board->pathfind_path[step_idx].x == 0)
+		{
+			break;
+		}
+		int w = board->pathfind_path[step_idx].x;
+		int h = board->pathfind_path[step_idx].y;
+		DrawText(TextFormat("%i", step_idx + 1),
+			board_pos_x + (w - 1) * BOARD_CELL_SIZE + 30, board_pos_y + (h - 1) * BOARD_CELL_SIZE + 30, 30, BLACK);
+
+	}
+#endif
 }
 
 static Color GetNextColor(Board* board)
@@ -390,13 +506,12 @@ Board* BoardCreate()
 
 	if (board != NULL)
 	{
-		for (int w = 0; w < BOARD_SIZE_WIDTH; ++w)
-		{
-			for (int h = 0; h < BOARD_SIZE_HEIGHT; ++h)
-			{
-				board->cells[w][h] = NULL;
-			}
-		}
+		memset(board->cells, 0, sizeof(board->cells));
+		memset(board->pathfind_cells, 0, sizeof(board->pathfind_cells));
+		memset(board->pathfind_path, 0, sizeof(board->pathfind_path));
+
+		board->pathfind_current_step = 0;
+		board->pathfind_step_time = 0;
 
 		board->colors[0] = GREEN;
 		board->colors[1] = BROWN;

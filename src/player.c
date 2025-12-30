@@ -33,14 +33,11 @@ static bool GameUpdate(Player* player, Game* game)
 				bool is_moved = game->board->fnTryMoveBubble(game->board, player->from, (Vector2) { mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y });
 				if (is_moved)
 				{
-					Bubble* bubble = game->board->fnTryGetBubble(game->board, (Vector2) { mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y });
-					if (bubble)
-					{
-						bubble->is_selected = false;
+					Bubble* bubble = game->board->fnTryGetBubble(game->board, player->from);
+					bubble->is_selected = false;
 
-						player->from = (Vector2){ 0.f, 0.f };
-						player->is_turn_end = true;
-					}
+					player->from = (Vector2){ 0.f, 0.f };
+					player->is_turn_end = true;
 				}
 				else
 				{

@@ -11,13 +11,13 @@ static bool UpdateBubble(Bubble* bubble)
 
 	if (bubble->add_time_animation > 0.f)
 	{
-		bubble->radius -= max_radius * (bubble->add_time_animation / ADD_ANIMATION_TIME);
+		bubble->radius -= max_radius * (bubble->add_time_animation / BUBBLE_ADD_ANIMATION_TIME);
 		bubble->add_time_animation = max(0.f, bubble->add_time_animation - GetFrameTime());
 		return false;
 	}
 	else if (bubble->destroy_time_animation > 0.f)
 	{
-		bubble->radius = max_radius * (bubble->destroy_time_animation / ADD_ANIMATION_TIME);
+		bubble->radius = max_radius * (bubble->destroy_time_animation / BUBBLE_ADD_ANIMATION_TIME);
 		bubble->destroy_time_animation = max(0.f, bubble->destroy_time_animation - GetFrameTime());
 		return false;
 	}
@@ -46,7 +46,7 @@ static void DrawBubble(Bubble* bubble, int bubble_pos_x, int bubble_pos_y)
 static void MarkForDestroy(Bubble* bubble)
 {
 	bubble->mark_for_destroy = true;
-	bubble->destroy_time_animation = ADD_ANIMATION_TIME;
+	bubble->destroy_time_animation = BUBBLE_ADD_ANIMATION_TIME;
 }
 
 Bubble* BubbleCreate(Color color)
@@ -60,7 +60,7 @@ Bubble* BubbleCreate(Color color)
 		bubble->mark_for_destroy = false;
 		bubble->color = color;
 		bubble->destroy_time_animation = 0.f;
-		bubble->add_time_animation = ADD_ANIMATION_TIME;
+		bubble->add_time_animation = BUBBLE_ADD_ANIMATION_TIME;
 		bubble->fnDraw = DrawBubble;
 		bubble->fnMarkForDestroy = MarkForDestroy;
 		bubble->fnUpdate = UpdateBubble;
