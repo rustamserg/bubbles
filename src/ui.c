@@ -114,7 +114,8 @@ static void Draw(UI* ui, Game* game)
 
 	if (game->state == STATE_GAME)
 	{
-		DrawGlowText(font, TextFormat("Score: %08i", game->total_score), (Vector2) { 800, 110 }, 40, RED);
+		DrawGlowText(font, TextFormat("Score:       %08i", game->total_score), (Vector2) { 800, 50 }, 40, RED);
+		DrawGlowText(font, TextFormat("High score: %08i", game->high_score), (Vector2) { 800, 110 }, 40, GREEN);
 
 		int x_pos = 260;
 		float radius = BOARD_CELL_SIZE / 2 - 10;
@@ -132,31 +133,54 @@ static void Draw(UI* ui, Game* game)
 
 		if (ui->score_msgs[ui->pop_score_msg_id].display_time > 0)
 		{
-			DrawGlowText(font, ui->score_msgs[ui->pop_score_msg_id].message, (Vector2) { 800, 50 }, 40, GOLD);
+			const char* msg = ui->score_msgs[ui->pop_score_msg_id].message;
+			DrawGlowText(font, msg,
+				(Vector2) { VIRTUAL_SCREEN_WIDTH/ 2 - MeasureText(msg, 40) / 2, VIRTUAL_SCREEN_HEIGHT - 50 }, 40, GOLD);
 		}
 
-		DrawTexture(ui->branch, 1200, -50, WHITE);
-		DrawTexture(ui->spikes, 1250, 730, WHITE);
+		float king_y = 585;
+		float column_y = 750;
 
-		float spiderY = 700;
-		if (game->board->free_cells_count > 0)
+		if (game->high_score > 0)
 		{
-			spiderY = 100.f + 500.f * (1.f - ((float)game->board->free_cells_count / (BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT))); // 100 -> 700
+			float score_ratio = 1.f;
+			if (game->total_score <= game->high_score)
+			{
+				score_ratio = (float)game->total_score / game->high_score;
+			}
+			king_y = 585 - 500 * score_ratio;
+			column_y = 750 - 500 * score_ratio;
 		}
-		DrawTextureRec(ui->web, (Rectangle) { 0, 0, 300.f, spiderY + 100.f }, (Vector2) { 1250, 40 }, BLACK);
-		DrawTexture(ui->spider, 1250, (int)spiderY, WHITE);
+		DrawTexture(ui->tex_colum, 1250, (int)column_y, WHITE);
+
+		if (game->total_score <= game->high_score)
+		{
+			DrawTexture(ui->tex_king_no_crown, 1300, (int)king_y, WHITE);
+		}
+		else
+		{
+			if (!ui->celebrate_new_king)
+			{
+				ui->celebrate_new_king = true;
+				AddSoundMessage(ui, &ui->sound_new_king, 2.f);
+			}
+
+			DrawGlowText(font, "NEW KING", (Vector2) { 1300, 50 }, 40, GREEN);
+			DrawTexture(ui->tex_king_crown, 1300, (int)king_y, WHITE);
+		}
 	}
 	else
 	{
 		const char* endMsg = "GAME OVER";
 		DrawGlowText(font, endMsg,
-			(Vector2) { VIRTUAL_SCREEN_WIDTH / 2 - (float)MeasureText(endMsg, 60) / 2, VIRTUAL_SCREEN_HEIGHT / 2 - 100 }, 60, RED);
+			(Vector2) { VIRTUAL_SCREEN_WIDTH / 2 - (float)MeasureText(endMsg, 60) / 2, VIRTUAL_SCREEN_HEIGHT / 2 - 100 }, 60, BLUE);
 
 		char scoreMsg[100] = { 0 };
 		strcpy(scoreMsg, TextFormat("YOUR SCORE: %08i", game->total_score));
+
 		DrawGlowText(font, scoreMsg,
 			(Vector2) {
-			VIRTUAL_SCREEN_WIDTH / 2 - (float)MeasureText(scoreMsg, 60) / 2, VIRTUAL_SCREEN_HEIGHT / 2 }, 60, BLUE);
+			VIRTUAL_SCREEN_WIDTH / 2 - (float)MeasureText(scoreMsg, 60) / 2, VIRTUAL_SCREEN_HEIGHT / 2 }, 60, GREEN);
 	}
 }
 
@@ -166,8 +190,11 @@ UI* UICreate()
 
 	if (ui != NULL)
 	{
+		ui->sound_new_king = LoadSound("new_king.wav");
 		ui->sound_bubble_cannot_move = LoadSound("bubble_cannot_move.wav");
 		ui->sound_bubble_destroy = LoadSound("bubble_destroy.wav");
+
+		ui->celebrate_new_king = false;
 
 		ui->push_sound_msg_id = 0;
 		ui->pop_sound_msg_id = 0;
@@ -177,10 +204,9 @@ UI* UICreate()
 		ui->pop_score_msg_id = 0;
 		memset(ui->score_msgs, 0, sizeof(ui->score_msgs));
 
-		ui->branch = LoadTexture("branch.png");
-		ui->spikes = LoadTexture("spikes.png");
-		ui->spider = LoadTexture("spider.png");
-		ui->web = LoadTexture("web.png");
+		ui->tex_king_no_crown = LoadTexture("king_no_crown.png");
+		ui->tex_colum = LoadTexture("king_column.png");
+		ui->tex_king_crown = LoadTexture("king_crown.png");
 
 		ui->fnNewGame = NewGame;
 		ui->fnAddScoreMessage = AddScoreMessage;

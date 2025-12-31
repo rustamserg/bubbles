@@ -7,7 +7,7 @@
 #define VIRTUAL_SCREEN_HEIGHT 900
 
 #define DRAW_OFFSET_X 80
-#define DRAW_OFFSET_Y 200
+#define DRAW_OFFSET_Y 180
 
 #define BOARD_SIZE_WIDTH 14
 #define BOARD_SIZE_HEIGHT 8
@@ -17,6 +17,8 @@
 #define BASE_SCORE 5
 #define MIN_MATCHES_IN_ROW 5
 #define NUM_BUBBLES_TO_ADD 3
+
+#define DEFAULT_HIGH_SCORE 100
 
 #define BUBBLE_ADD_ANIMATION_TIME 0.3f
 #define BUBBLE_MOVE_ANIMATION_TIME 0.01f
@@ -56,9 +58,11 @@ typedef struct Game
 	struct Player* player;
 	struct UI* ui;
 
+	int high_score;
+	int total_score;
+
 	int min_matches;
 	int current_strike;
-	int total_score;
 	ScoreDef score_ladder[5];
 
 	Color next_colors[NUM_BUBBLES_TO_ADD];

@@ -51,7 +51,7 @@ int main ()
 	
 	Music back_music = LoadMusicStream("background.wav");
 	SetMusicVolume(back_music, 0.5f);
-	PlayMusicStream(back_music);
+	//PlayMusicStream(back_music);
 
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window

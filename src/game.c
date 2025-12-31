@@ -4,6 +4,27 @@
 #include "ai.h"
 #include "ui.h"
 
+#include <string.h>
+
+
+static void SaveHighScoreBin(const char* path, int score)
+{
+	SaveFileData(path, &score, sizeof(score));
+}
+
+static int LoadHighScoreBin(const char* path)
+{
+	if (!FileExists(path)) return DEFAULT_HIGH_SCORE;
+
+	int size = 0;
+	unsigned char* data = LoadFileData(path, &size);
+	if (!data || size != (int)sizeof(int)) { if (data) UnloadFileData(data); return 0; }
+
+	int score = 0;
+	memcpy(&score, data, sizeof(int));
+	UnloadFileData(data);
+	return score;
+}
 
 static void ProcessScore(Game* game)
 {
@@ -20,6 +41,11 @@ static void ProcessScore(Game* game)
 
 static void NewGame(Game* game)
 {
+	if (game->total_score > game->high_score)
+	{
+		game->high_score = game->total_score;
+	}
+
 	game->state = STATE_GAME;
 	game->turn = TURN_AI;
 	game->total_score = 0;
@@ -74,6 +100,12 @@ static void Update(Game* game)
 	}
 	else
 	{
+		if (game->total_score > game->high_score)
+		{
+			SaveHighScoreBin("hs.bin", game->total_score);
+			game->high_score = game->total_score;
+		}
+
 		// update our player in end game coz it is our player controller and input here
 		game->player->fnUpdate(game->player, game);
 	}
@@ -91,6 +123,7 @@ static void Draw(Game* game)
 
 void GameInit(Game* game)
 {
+	game->high_score = LoadHighScoreBin("hs.bin");
 	game->total_score = 0;
 	game->current_strike = 0;
 	game->score_ladder[0] = (ScoreDef){ BASE_SCORE, 1, "GOOD" };

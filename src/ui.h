@@ -23,6 +23,7 @@ typedef struct UI
 {
 	Sound sound_bubble_cannot_move;
 	Sound sound_bubble_destroy;
+	Sound sound_new_king;
 
 	int push_sound_msg_id;
 	int pop_sound_msg_id;
@@ -32,10 +33,10 @@ typedef struct UI
 	int pop_score_msg_id;
 	ScoreMessage score_msgs[3];
 
-	Texture branch;
-	Texture spikes;
-	Texture web;
-	Texture spider;
+	Texture tex_king_no_crown;
+	Texture tex_king_crown;
+	Texture tex_colum;
+	bool celebrate_new_king;
 
 	bool (*fnUpdate)(struct UI*, struct Game*);
 	void (*fnDraw)(struct UI*, struct Game*);
