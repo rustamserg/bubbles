@@ -16,7 +16,7 @@
 
 #define BASE_SCORE 5
 #define MIN_MATCHES_IN_ROW 5
-#define NUM_BUBBLES_TO_ADD 3
+#define NUM_BUBBLES_TO_ADD 4
 
 #define DEFAULT_HIGH_SCORE 100
 
