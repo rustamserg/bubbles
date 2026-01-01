@@ -29,6 +29,7 @@ typedef struct Board
 	Color (*fnGetNextColor)(struct Board*);
 	bool (*fnAddBubble)(struct Board*, Color);
 	bool (*fnTryMoveBubble)(struct Board*, Vector2, Vector2);
+	bool (*fnTrySwapBubbles)(struct Board*, Vector2, Vector2);
 	struct Bubble* (*fnTryGetBubble)(struct Board*, Vector2);
 } Board;
 

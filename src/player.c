@@ -27,10 +27,11 @@ static bool GameUpdate(Player* player, Game* game)
 		}
 		else
 		{
-			Bubble* bubble = game->board->fnTryGetBubble(game->board, (Vector2) { mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y });
+			Vector2 to_pos = (Vector2){ mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y };
+			Bubble* bubble = game->board->fnTryGetBubble(game->board, to_pos);
 			if (NULL == bubble)
 			{
-				bool is_moved = game->board->fnTryMoveBubble(game->board, player->from, (Vector2) { mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y });
+				bool is_moved = game->board->fnTryMoveBubble(game->board, player->from, to_pos);
 				if (is_moved)
 				{
 					Bubble* bubble = game->board->fnTryGetBubble(game->board, player->from);
@@ -46,11 +47,23 @@ static bool GameUpdate(Player* player, Game* game)
 			}
 			else
 			{
-				Bubble* old_bubble = game->board->fnTryGetBubble(game->board, player->from);
-				old_bubble->is_selected = false;
+				bool is_swapped = game->board->fnTrySwapBubbles(game->board, player->from, to_pos);
+				if (is_swapped)
+				{
+					Bubble* bubble = game->board->fnTryGetBubble(game->board, player->from);
+					bubble->is_selected = false;
 
-				bubble->is_selected = true;
-				player->from = (Vector2){ mousePos.x - DRAW_OFFSET_X, mousePos.y - DRAW_OFFSET_Y };
+					player->from = (Vector2){ 0.f, 0.f };
+					player->is_turn_end = true;
+				}
+				else
+				{
+					Bubble* old_bubble = game->board->fnTryGetBubble(game->board, player->from);
+					old_bubble->is_selected = false;
+
+					bubble->is_selected = true;
+					player->from = to_pos;
+				}
 			}
 		}
 	}

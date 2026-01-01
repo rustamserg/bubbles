@@ -281,6 +281,40 @@ static Bubble* TryGetBubble(Board* board, Vector2 hitPos)
 	return NULL;
 }
 
+static bool TrySwapBubbles(Board* board, Vector2 fromPos, Vector2 toPos)
+{
+	int w_from = (int)(fromPos.x / BOARD_CELL_SIZE);
+	int h_from = (int)(fromPos.y / BOARD_CELL_SIZE);
+
+	int w_to = (int)(toPos.x / BOARD_CELL_SIZE);
+	int h_to = (int)(toPos.y / BOARD_CELL_SIZE);
+
+	if (w_from < BOARD_SIZE_WIDTH && h_from < BOARD_SIZE_HEIGHT)
+	{
+		if (w_to < BOARD_SIZE_WIDTH && h_to < BOARD_SIZE_HEIGHT)
+		{
+			if (board->cells[w_from][h_from] != NULL && board->cells[w_to][h_to] != NULL)
+			{
+				if (abs(w_from - w_to) <= 1 && abs(h_from - h_to) <= 1)
+				{
+					Bubble* b1 = board->cells[w_from][h_from];
+					board->cells[w_from][h_from] = board->cells[w_to][h_to];
+					board->cells[w_to][h_to] = b1;
+
+					board->last_update_h[0] = h_from;
+					board->last_update_w[0] = w_from;
+					board->last_update_h[1] = h_to;
+					board->last_update_w[1] = w_to;
+					board->added_bubbles = 2;
+
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 static bool TryMoveBubble(Board* board, Vector2 fromPos, Vector2 toPos)
 {
 	int w_from = (int)(fromPos.x / BOARD_CELL_SIZE);
@@ -525,6 +559,7 @@ Board* BoardCreate()
 		board->destroyed_bubbles = 0;
 		board->free_cells_count = BOARD_SIZE_WIDTH * BOARD_SIZE_HEIGHT;
 
+		board->fnTrySwapBubbles = TrySwapBubbles;
 		board->fnGetNextColor = GetNextColor;
 		board->fnDraw = DrawBoard;
 		board->fnAddBubble = AddBubble;
